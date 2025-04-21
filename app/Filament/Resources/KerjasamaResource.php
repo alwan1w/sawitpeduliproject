@@ -5,7 +5,6 @@ namespace App\Filament\Resources;
 use Filament\Forms;
 use Filament\Tables;
 use Filament\Forms\Form;
-use App\Models\Kerjasama;
 use Filament\Tables\Table;
 use Filament\Tables\Actions\ViewAction;
 use App\Models\Recruitment;

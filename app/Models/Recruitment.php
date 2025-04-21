@@ -34,4 +34,9 @@ class Recruitment extends Model
     {
         return $this->belongsTo(User::class, 'agency_id');
     }
+    public function applications()
+    {
+        return $this->hasMany(\App\Models\Application::class);
+    }
+
 }
