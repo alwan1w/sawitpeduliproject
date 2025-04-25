@@ -2,94 +2,86 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Forms;
-use Filament\Tables;
+use App\Models\Recruitment;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
-use App\Models\Recruitment;
 use Filament\Resources\Resource;
-use Illuminate\Support\Facades\Auth;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
-use Filament\Tables\Actions\ViewAction;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\DatePicker;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\RecruitmentResource\Pages;
-use App\Filament\Resources\RecruitmentResource\RelationManagers;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\DatePicker;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Actions\ViewAction;
+use Filament\Tables\Actions\Action;
 
 class RecruitmentResource extends Resource
 {
     protected static ?string $model = Recruitment::class;
-
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationLabel = 'Rekrutmen';
+    protected static ?string $navigationGroup = 'Perusahaan';
+    protected static ?string $navigationIcon = 'heroicon-o-briefcase';
 
     public static function form(Form $form): Form
     {
         return $form->schema([
-            TextInput::make('position')->required(),
-            Textarea::make('detail_posisi')
-                ->label('Detail Posisi')
-                ->rows(3)
-                ->maxLength(500)
-                ->columnSpanFull(),
-            TextInput::make('requirement_total')->numeric()->required(),
-            DatePicker::make('open_date')->required(),
-            DatePicker::make('close_date')->required(),
-            TextInput::make('salary_range'),
-            TextInput::make('contract_duration'),
-            Textarea::make('skills'),
-            TextInput::make('age_range'),
-            TextInput::make('education'),
+            Select::make('company_id')
+                ->relationship('company', 'name')
+                ->label('Perusahaan')
+                ->required(),
+
+            TextInput::make('position')->label('Posisi')->required(),
+            Textarea::make('detail_posisi')->label('Detail Posisi')->rows(3)->columnSpanFull(),
+
+            TextInput::make('requirement_total')->label('Kebutuhan')->numeric()->required(),
+            DatePicker::make('open_date')->label('Tanggal Dibuka')->required(),
+            DatePicker::make('close_date')->label('Tanggal Ditutup')->required(),
+
+            TextInput::make('salary_range')->label('Rentang Gaji'),
+            TextInput::make('contract_duration')->label('Durasi Kontrak'),
+            Textarea::make('skills')->label('Keahlian'),
+            TextInput::make('age_range')->label('Rentang Usia'),
+            TextInput::make('education')->label('Pendidikan Minimal'),
+
             TextInput::make('status')
+                ->label('Status')
                 ->default('mencari_agen')
                 ->disabled(),
         ]);
     }
 
-
     public static function table(Table $table): Table
     {
         return $table->columns([
-            TextColumn::make('position')->label('Posisi'),
-            TextColumn::make('detail_posisi')->label('Detail Posisi')->limit(50)->wrap(),
-            TextColumn::make('agency.name')->label('Agen')->default('-'),
+            TextColumn::make('position')->label('Posisi')->sortable()->searchable(),
+            TextColumn::make('detail_posisi')->label('Detail Posisi')->limit(40)->wrap(),
             TextColumn::make('requirement_total')->label('Kebutuhan'),
             TextColumn::make('status')->label('Status')
-                ->formatStateUsing(fn ($state) => match($state) {
+                ->formatStateUsing(fn ($state) => match ($state) {
                     'mencari_agen' => 'Mencari Agen',
                     'mencari_pekerja' => 'Mencari Pekerja',
                     'selesai' => 'Selesai',
+                    default => ucfirst($state),
                 }),
+
             TextColumn::make('close_date')->label('Batas Waktu'),
+
+            TextColumn::make('workers_count')
+                ->label('Jumlah Pekerja')
+                ->counts('workers')
+                ->default('-')
+                ->sortable(),
         ])
         ->actions([
             ViewAction::make(),
 
+            Action::make('Lihat Pekerja')
+                ->label('Lihat Pekerja')
+                ->icon('heroicon-o-users')
+                ->url(fn (Recruitment $record) => route('filament.admin.resources.workers.index'))
+                ->visible(fn (Recruitment $record) => $record->workers()->exists())
+                ->color('primary'),
         ]);
-    }
-
-    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
-    {
-        return parent::getEloquentQuery()
-            ->where('company_id', Auth::id());
-    }
-
-    public static function mutateFormDataBeforeCreate(array $data): array
-    {
-        $data['company_id'] = Auth::id();
-        $data['status'] = 'mencari_agen';
-        return $data;
-    }
-
-
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
     }
 
     public static function getPages(): array

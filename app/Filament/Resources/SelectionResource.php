@@ -46,22 +46,28 @@ class SelectionResource extends Resource
                     $record->update(['status' => 'gagal']);
                 }),
 
-            Action::make('Lolos')
+                Action::make('Lolos')
                 ->color('success')
                 ->visible(fn (Selection $record) => $record->status === null)
                 ->action(function (Selection $record) {
                     $record->update(['status' => 'lolos']);
 
-                    // Hitung jumlah peserta lolos
                     $recruitment = $record->application->recruitment;
-                    $jumlahLolos = $recruitment->applications()
-                        ->whereHas('selection', fn ($q) => $q->where('status', 'lolos'))
-                        ->count();
 
+                    // Tambahkan worker dengan recruitment_id!
+                    \App\Models\Worker::create([
+                        'application_id' => $record->application_id,
+                        'company_id' => $recruitment->company_id,
+                        'recruitment_id' => $recruitment->id, // << tambahkan ini!
+                    ]);
+
+                    // Update status recruitment kalau sudah penuh
+                    $jumlahLolos = $recruitment->workers()->count();
                     if ($jumlahLolos >= $recruitment->requirement_total) {
                         $recruitment->update(['status' => 'selesai']);
                     }
                 }),
+
         ]);
     }
 

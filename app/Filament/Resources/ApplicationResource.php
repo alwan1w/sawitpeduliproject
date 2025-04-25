@@ -41,7 +41,12 @@ class ApplicationResource extends Resource
             DatePicker::make('birth_date')->label('Tanggal Lahir')->required()->disabled($isView),
             Textarea::make('address')->label('Alamat Domisili')->required()->disabled($isView),
 
-            FileUpload::make('cv')->label('Curriculum Vitae')->disk('public')->directory('cv')->downloadable()->disabled($isView),
+            FileUpload::make('cv')
+                ->label('Curriculum Vitae')
+                ->disk('public')
+                ->directory('cv')
+                ->downloadable()
+                ->disabled($isView),
             FileUpload::make('certificate')->label('Sertifikat Pelatihan')->disk('public')->directory('sertifikat')->downloadable()->disabled($isView),
             FileUpload::make('ijazah')->label('Fotokopi Ijazah')->disk('public')->directory('ijazah')->downloadable()->disabled($isView),
         ]);

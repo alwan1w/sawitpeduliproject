@@ -10,6 +10,7 @@ class Recruitment extends Model
     use HasFactory;
 
     protected $fillable = [
+        'company_id',
         'position',
         'detail_posisi',
         'requirement_total',
@@ -21,22 +22,30 @@ class Recruitment extends Model
         'age_range',
         'education',
         'status',
-        'company_id',
         'agency_id',
     ];
 
-    public function company()
-    {
-        return $this->belongsTo(User::class, 'company_id');
-    }
-
+    // Relationship with Agency (user model for agencies)
     public function agency()
     {
         return $this->belongsTo(User::class, 'agency_id');
     }
+
+    // Relationship with workers (no company_id needed)
+    public function workers()
+    {
+        return $this->hasMany(\App\Models\Worker::class);
+    }
+
+    // Relationship with applications
     public function applications()
     {
-        return $this->hasMany(\App\Models\Application::class);
+        return $this->hasMany(Application::class);
+    }
+
+    public function company()
+    {
+        return $this->belongsTo(Company::class);
     }
 
 }

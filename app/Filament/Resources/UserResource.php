@@ -16,6 +16,7 @@ use App\Filament\Resources\UserResource\Pages;
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
+    protected static ?string $navigationGroup = 'Roles and Permissions';
 
     public static function form(Form $form): Form
     {
