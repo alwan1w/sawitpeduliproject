@@ -11,15 +11,21 @@ class Application extends Model
 
     protected $fillable = [
         'recruitment_id',
+        'user_id',
         'name',
         'phone',
         'birth_place',
         'birth_date',
         'address',
-        'cv',
-        'certificate',
-        'ijazah',
+        'documents',
+        // field upload dinamis: slug dokumen akan otomatis jadi kolom di migration
         'status',
+    ];
+
+    protected $casts = [
+        'birth_date' => 'date',
+        'required_documents' => 'array',
+        'documents'          => 'array',
     ];
 
     public function recruitment()
@@ -30,5 +36,10 @@ class Application extends Model
     public function selection()
     {
         return $this->hasOne(\App\Models\Selection::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

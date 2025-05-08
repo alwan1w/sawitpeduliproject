@@ -13,7 +13,7 @@ class CreateRecruitment extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        $data['company_id'] = Auth::id();
+
         $data['status'] = 'mencari_agen';
         return $data;
     }
