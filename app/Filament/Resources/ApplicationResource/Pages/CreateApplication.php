@@ -9,14 +9,9 @@ class CreateApplication extends CreateRecord
 {
     protected static string $resource = ApplicationResource::class;
 
-    protected function mutateFormDataBeforeCreate(array $data): array
-    {
-        return parent::mutateFormDataBeforeCreate($data);
-    }
-
-    // redirect kembali ke index setelah create
+    // redirect ke index setelah sukses созда
     protected function getRedirectUrl(): string
     {
-        return ApplicationResource::getUrl('index');
+        return $this->getResource()::getUrl('index');
     }
 }

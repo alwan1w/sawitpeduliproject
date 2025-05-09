@@ -7,11 +7,12 @@ use Filament\Forms\Form;
 use Filament\Tables\Table;
 use App\Models\Application;
 use App\Models\Recruitment;
+use Illuminate\Support\Str;
 use Filament\Resources\Resource;
 use Illuminate\Support\Facades\Auth;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Hidden;
-use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Select;
+use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
@@ -30,108 +31,72 @@ class ApplicationResource extends Resource
 
     public static function form(Form $form): Form
     {
-        // pull from config
-        $types = config('documents.types');
-
         return $form->schema([
-
+            // auto-set user_id dan default status
             Hidden::make('user_id')
                 ->default(fn () => Auth::id()),
+
             Hidden::make('status')
                 ->default('masuk'),
 
+            // Pilih lowongan
             Select::make('recruitment_id')
                 ->label('Pilih Lowongan')
                 ->options(
                     Recruitment::query()
                         ->where('status', 'mencari_pekerja')
-                        ->with('company') // eager load Company supaya tidak N+1
+                        ->with('company')
                         ->get()
-                        ->mapWithKeys(fn (Recruitment $r) => [
-                            $r->id => "{$r->company->name} - {$r->position}",
+                        ->mapWithKeys(fn($r) => [
+                            $r->id => "{$r->company->name} - {$r->position}"
                         ])
                         ->toArray()
-                        )
-                        ->searchable()
-                        ->required(),
+                )
+                ->reactive()
+                ->required(),
 
-            TextInput::make('name')->label('Nama Lengkap')->required(),
-            TextInput::make('phone')->label('No. Telepon')->required(),
-            TextInput::make('birth_place')->label('Tempat Lahir')->required(),
-            DatePicker::make('birth_date')->label('Tanggal Lahir')->required(),
-            Textarea::make('address')->label('Alamat Domisili')->required(),
+            TextInput::make('name')
+                ->label('Nama Lengkap')
+                ->required(),
 
-            // Ask which docs are required
-            CheckboxList::make('required_documents')
-                ->label('Dokumen yang Diperlukan')
-                ->options($types)
-                ->columns(2)
-                ->required()
-                ->reactive(),
+            TextInput::make('phone')
+                ->label('No. Telepon')
+                ->required(),
 
-            // Dynamically show one FileUpload per selected type
-            FileUpload::make('documents.cv')
-                ->label($types['cv'])
-                ->directory('applications')
-                ->nullable()
-                ->visible(fn($get) => in_array('cv', (array) $get('required_documents'))),
+            TextInput::make('birth_place')
+                ->label('Tempat Lahir')
+                ->required(),
 
-            FileUpload::make('documents.sertifikat')
-                ->label($types['sertifikat'])
-                ->directory('applications')
-                ->nullable()
-                ->visible(fn($get) => in_array('sertifikat', (array) $get('required_documents'))),
+            DatePicker::make('birth_date')
+                ->label('Tanggal Lahir')
+                ->required(),
 
-            FileUpload::make('documents.ijazah')
-                ->label($types['ijazah'])
-                ->directory('applications')
-                ->nullable()
-                ->visible(fn($get) => in_array('ijazah', (array) $get('required_documents'))),
+            TextInput::make('address')
+                ->label('Alamat Domisili')
+                ->columnSpanFull()
+                ->required(),
 
-            FileUpload::make('documents.sk_sehat')
-                ->label($types['sk_sehat'])
-                ->directory('applications')
-                ->nullable()
-                ->visible(fn($get) => in_array('sk_sehat', (array) $get('required_documents'))),
-
-            FileUpload::make('documents.pas_foto_3x4')
-                ->label($types['pas_foto_3x4'])
-                ->directory('applications')
-                ->nullable()
-                ->visible(fn($get) => in_array('pas_foto_3x4', (array) $get('required_documents'))),
-
-            FileUpload::make('documents.ktp')
-                ->label($types['ktp'])
-                ->directory('applications')
-                ->nullable()
-                ->visible(fn($get) => in_array('ktp', (array) $get('required_documents'))),
-
-            FileUpload::make('documents.kk')
-                ->label($types['kk'])
-                ->directory('applications')
-                ->nullable()
-                ->visible(fn($get) => in_array('kk', (array) $get('required_documents'))),
-
-            FileUpload::make('documents.skck')
-                ->label($types['skck'])
-                ->directory('applications')
-                ->nullable()
-                ->visible(fn($get) => in_array('skck', (array) $get('required_documents'))),
-
-            FileUpload::make('documents.transkrip_nilai')
-                ->label($types['transkrip_nilai'])
-                ->directory('applications')
-                ->nullable()
-                ->visible(fn($get) => in_array('transkrip_nilai', (array) $get('required_documents'))),
-
-            FileUpload::make('documents.sim_a_c_b_b2')
-                ->label($types['sim_a_c_b_b2'])
-                ->directory('applications')
-                ->nullable()
-                ->visible(fn($get) => in_array('sim_a_c_b_b2', (array) $get('required_documents'))),
-
-            // … repeat for each key in config/documents.php …
-            // e.g. documents.sk_sehat, documents.pas_foto_3x4, etc.
+            // Tampilkan upload field sesuai lowongan yang dipilih
+            Forms\Components\Section::make('Unggah Dokumen')
+                ->schema(function (callable $get) {
+                    // ambil array required_documents dari recruitment
+                    $reqs = [];
+                    if ($rid = $get('recruitment_id')) {
+                        $reqs = Recruitment::find($rid)?->required_documents ?? [];
+                    }
+                    // bangun schema FileUpload
+                    return collect($reqs)
+                        ->map(fn(string $doc) => [
+                            'component' => FileUpload::make('documents.' . Str::slug($doc, '_'))
+                                ->label($doc)
+                                ->directory('applications')
+                                ->required(),
+                        ])
+                        ->pluck('component')
+                        ->toArray();
+                })
+                ->visible(fn(callable $get) => ! empty($get('recruitment_id')))
+                ->columns(2),
 
         ]);
     }
@@ -144,11 +109,9 @@ class ApplicationResource extends Resource
                 TextColumn::make('recruitment.company.name')->label('Perusahaan'),
                 TextColumn::make('name')->label('Pelamar'),
                 TextColumn::make('phone')->label('Telepon'),
-
-                // <-- PASTIKAN ADA DI SINI, BUKAN DI PROPERTY KELUARAN CLASS!
                 BadgeColumn::make('status')
                     ->label('Status')
-                    ->formatStateUsing(fn (string $state): string => match($state) {
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
                         'masuk'    => 'Masuk',
                         'seleksi'  => 'Seleksi',
                         'ditolak'  => 'Ditolak',
@@ -160,10 +123,11 @@ class ApplicationResource extends Resource
                         'warning'   => 'seleksi',
                         'danger'    => 'ditolak',
                         'success'   => 'diterima',
-                    ]),
+                    ])
             ])
             ->actions([
                 ViewAction::make(),
+                EditAction::make(),
             ]);
     }
 
@@ -172,23 +136,16 @@ class ApplicationResource extends Resource
         return [
             'index'  => Pages\ListApplications::route('/'),
             'create' => Pages\CreateApplication::route('/create'),
-            'edit'   => Pages\EditApplication::route('/{record}/edit'),
+            'view'   => Pages\ViewApplication::route('/{record}'),
+            'edit'   => Pages\EditApplication::route('/{record}/edit'),  // <— pastikan ada
+
         ];
     }
 
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
-        // show only the logged-in user’s own applications
+        // hanya lamaran user tersebut
         return parent::getEloquentQuery()
             ->where('user_id', Auth::id());
-    }
-
-    protected function mutateFormDataBeforeCreate(array $data): array
-    {
-        $data['user_id'] = Auth::id();
-        $data['status']  = 'masuk';
-        $data['required_documents'] = $data['required_documents'] ?? [];
-        // default
-        return $data;
     }
 }
