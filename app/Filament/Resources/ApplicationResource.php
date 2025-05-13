@@ -3,12 +3,15 @@
 namespace App\Filament\Resources;
 
 use Filament\Forms;
+use App\Models\User;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use App\Models\Application;
 use App\Models\Recruitment;
 use Illuminate\Support\Str;
 use Filament\Resources\Resource;
+use Illuminate\Support\Facades\DB;
+use Filament\Tables\Actions\Action;
 use Illuminate\Support\Facades\Auth;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
@@ -90,6 +93,9 @@ class ApplicationResource extends Resource
                             'component' => FileUpload::make('documents.' . Str::slug($doc, '_'))
                                 ->label($doc)
                                 ->directory('applications')
+                                ->openable()
+                                ->downloadable()
+                                ->preserveFilenames()
                                 ->required(),
                         ])
                         ->pluck('component')
@@ -97,6 +103,7 @@ class ApplicationResource extends Resource
                 })
                 ->visible(fn(callable $get) => ! empty($get('recruitment_id')))
                 ->columns(2),
+
 
         ]);
     }
@@ -128,6 +135,26 @@ class ApplicationResource extends Resource
             ->actions([
                 ViewAction::make(),
                 EditAction::make(),
+                Action::make('konfirmasi')
+                    ->label('Konfirmasi Bergabung')
+                    ->color('success')
+                    ->icon('heroicon-o-check')
+                    ->requiresConfirmation()
+                    ->action(function ($record) {
+                        DB::transaction(function () use ($record) {
+                            // Update status lamaran terpilih
+                            $record->update(['status' => 'dikonfirmasi']);
+
+                            // Update semua lamaran lain user jadi ditolak
+                            Application::where('user_id', $record->user_id)
+                                ->where('id', '!=', $record->id)
+                                ->update(['status' => 'ditolak']);
+
+                            // Ubah role user jadi pekerja
+                            $record->user->syncRoles(['pekerja']);
+                        });
+                    })
+                    ->visible(fn ($record) => $record->status === 'diterima')
             ]);
     }
 
