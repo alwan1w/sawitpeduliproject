@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use Filament\Forms;
 use App\Models\User;
+use App\Models\Worker;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use App\Models\Application;
@@ -19,6 +20,7 @@ use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
@@ -142,19 +144,47 @@ class ApplicationResource extends Resource
                     ->requiresConfirmation()
                     ->action(function ($record) {
                         DB::transaction(function () use ($record) {
+                            // Cek apakah sudah ada Worker dengan user_id ini
+                            $workerExists = Worker::where('user_id', $record->user_id)->exists();
+                            if ($workerExists) {
+                                Notification::make()
+                                    ->title('Pekerja sudah terdaftar sebelumnya!')
+                                    ->danger()
+                                    ->send();
+
+                                return;
+                            }
+
                             // Update status lamaran terpilih
                             $record->update(['status' => 'dikonfirmasi']);
 
-                            // Update semua lamaran lain user jadi ditolak
+                            // Tolak semua lamaran lain
                             Application::where('user_id', $record->user_id)
                                 ->where('id', '!=', $record->id)
                                 ->update(['status' => 'ditolak']);
 
-                            // Ubah role user jadi pekerja
+                            // Ubah role user menjadi pekerja
                             $record->user->syncRoles(['pekerja']);
+
+                            // Ambil durasi kontrak
+                            $durasiBulan = $record->recruitment->contract_duration;
+
+                            // Hitung tanggal mulai dan batas kontrak
+                            $startDate = now();
+                            $batasKontrak = $startDate->copy()->addMonths($durasiBulan);
+
+                            // Buat data di tabel Worker
+                            Worker::create([
+                                'application_id' => $record->id,
+                                'recruitment_id' => $record->recruitment_id,
+                                'company_id'     => $record->recruitment->company_id,
+                                'user_id'        => $record->user_id,
+                                'start_date'     => $startDate,
+                                'batas_kontrak'  => $batasKontrak,
+                            ]);
                         });
                     })
-                    ->visible(fn ($record) => $record->status === 'diterima')
+                    ->visible(fn ($record) => $record->status === 'diterima'),
             ]);
     }
 

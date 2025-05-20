@@ -6,6 +6,9 @@ use App\Filament\Resources\LamaranMasukResource;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Infolists\Infolist;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\Section;
 
 class ViewLamaranMasuk extends ViewRecord
 {

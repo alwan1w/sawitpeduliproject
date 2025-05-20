@@ -12,8 +12,6 @@ class ListLamaranMasuks extends ListRecords
 
     protected function getHeaderActions(): array
     {
-        return [
-            Actions\CreateAction::make(),
-        ];
+        return []; // Kosongkan agar tombol "Create" tidak muncul
     }
 }

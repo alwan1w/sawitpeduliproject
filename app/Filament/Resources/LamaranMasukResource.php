@@ -34,7 +34,7 @@ class LamaranMasukResource extends Resource
                 ->label('Lowongan')
                 ->content(fn ($record) =>
                     ($record->recruitment->company->name ?? '-') .
-                    ' – ' .
+                    ' - ' .
                     ($record->recruitment->position ?? '-')
                 ),
 
@@ -83,11 +83,6 @@ class LamaranMasukResource extends Resource
                 })
                 ->visible(fn(callable $get) => ! empty($get('recruitment_id')))
                 ->columns(2)
-                ->disabled(),
-
-            // Proses Seleksi
-            Forms\Components\Textarea::make('selection_process')
-                ->label('Proses Seleksi')
                 ->disabled(),
         ]);
     }

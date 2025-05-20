@@ -45,7 +45,11 @@ class RecruitmentResource extends Resource
             DatePicker::make('open_date')->label('Tanggal Mulai')->required(),
             DatePicker::make('close_date')->label('Tanggal Tutup')->required(),
             TextInput::make('salary_range')->label('Rentang Gaji'),
-            TextInput::make('contract_duration')->label('Durasi Kontrak'),
+            TextInput::make('contract_duration')
+                ->label('Durasi Kontrak (bulan)')
+                ->numeric()
+                ->minValue(1)
+                ->required(),
             Textarea::make('skills')->label('Keahlian Diperlukan'),
             TextInput::make('age_range')->label('Rentang Usia'),
             TextInput::make('education')->label('Pendidikan Minimal'),

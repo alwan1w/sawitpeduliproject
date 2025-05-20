@@ -4,13 +4,14 @@ namespace App\Filament\Resources;
 
 use Filament\Forms;
 use Filament\Tables;
-use App\Models\Recruitment;
-use Filament\Resources\Resource;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
+use App\Models\Recruitment;
+use Filament\Resources\Resource;
+use Filament\Tables\Actions\Action;
 use Illuminate\Support\Facades\Auth;
-use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use App\Filament\Resources\AgencyRecruitmentResource\Pages;
 
@@ -118,6 +119,14 @@ class AgencyRecruitmentResource extends Resource
                     ->getStateUsing(fn ($record) => $record->applications()->whereIn('status', ['diterima', 'dikonfirmasi'])->count()),
             ])
             ->actions([
+                Action::make('viewLamaranMasuk')
+                    ->label('Lihat Lamaran Masuk')
+                    ->url(fn ($record) => LamaranMasukResource::getUrl('index', ['tableFilters' => ['recruitment_id' => $record->id]]))
+                    ->color('info'),
+                Action::make('viewPesertaSeleksi')
+                    ->label('Lihat Peserta Seleksi')
+                    ->url(fn ($record) => SelectionResource::getUrl('index', ['tableFilters' => ['recruitment_id' => $record->id]]))
+                    ->color('warning'),
                 ViewAction::make(),
                 EditAction::make(),
             ]);

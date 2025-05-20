@@ -2,8 +2,6 @@
 
 namespace App\Providers\Filament;
 
-use App\Filament\Auth\Pages\Register;
-use App\Filament\Pages\Auth\LoginCustom;
 use Filament\Pages;
 use Filament\Panel;
 use Filament\Widgets;
@@ -11,7 +9,10 @@ use Filament\PanelProvider;
 use Filament\Facades\Filament;
 use Filament\Support\Colors\Color;
 use Illuminate\Support\Facades\Auth;
+use App\Filament\Auth\Pages\Register;
+use App\Filament\Pages\StatusPekerja;
 use App\Filament\Pages\RegisterPelamar;
+use App\Filament\Pages\Auth\LoginCustom;
 use App\Filament\Resources\UserResource;
 use Illuminate\Support\Facades\Redirect;
 use Filament\Http\Middleware\Authenticate;
@@ -35,6 +36,9 @@ class AdminPanelProvider extends PanelProvider
             ->path('dashboard')
             ->login(LoginCustom::class)
             ->registration(Register::class)
+            ->pages([
+                StatusPekerja::class,
+            ])
             ->passwordReset()
             ->emailVerification()
             ->colors([

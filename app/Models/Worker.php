@@ -14,6 +14,14 @@ class Worker extends Model
         'company_id',
         'recruitment_id',
         'start_date',
+        'user_id',
+        'batas_kontrak',
+        'status_kontrak',
+    ];
+
+    protected $casts = [
+        'start_date'     => 'date',
+        'batas_kontrak'  => 'date',
     ];
 
     public function application()
@@ -29,6 +37,11 @@ class Worker extends Model
     public function recruitment()
     {
         return $this->belongsTo(Recruitment::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 
 }
