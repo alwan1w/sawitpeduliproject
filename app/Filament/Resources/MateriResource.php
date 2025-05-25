@@ -2,16 +2,17 @@
 
 namespace App\Filament\Resources;
 
-use App\Models\Materi;
 use Filament\Forms;
 use Filament\Tables;
-use Filament\Resources\Resource;
+use App\Models\Materi;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
-use App\Filament\Resources\MateriResource\Pages;
-use Filament\Tables\Actions\ViewAction;
+use Filament\Resources\Resource;
+use Illuminate\Support\Facades\Gate;
 use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Actions\DeleteAction;
+use App\Filament\Resources\MateriResource\Pages;
 
 class MateriResource extends Resource
 {
@@ -71,5 +72,10 @@ class MateriResource extends Resource
             'create' => Pages\CreateMateri::route('/create'),
             'edit' => Pages\EditMateri::route('/{record}/edit'),
         ];
+    }
+
+    public static function canAccess(): bool
+    {
+        return Gate::allows('akses materi');
     }
 }

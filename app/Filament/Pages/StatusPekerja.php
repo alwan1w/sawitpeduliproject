@@ -4,13 +4,14 @@ namespace App\Filament\Pages;
 
 use Carbon\Carbon;
 use App\Models\Worker;
-use Filament\Pages\Page;
 use Filament\Forms\Form;
+use Filament\Pages\Page;
 use Illuminate\Support\Facades\Auth;
-use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Concerns\InteractsWithForms;
+use Illuminate\Support\Facades\Gate;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Concerns\InteractsWithForms;
 
 class StatusPekerja extends Page implements HasForms
 {
@@ -67,5 +68,10 @@ class StatusPekerja extends Page implements HasForms
                 Placeholder::make('kontak_perusahaan')->label('Kontak')->content($w->application->recruitment->company->kontak),
             ]),
         ]);
+    }
+
+    public static function canAccess(): bool
+    {
+        return Gate::allows('akses status');
     }
 }

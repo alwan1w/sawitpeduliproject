@@ -2,17 +2,18 @@
 
 namespace App\Filament\Resources;
 
-use App\Models\Training;
-use App\Models\Materi;
 use Filament\Forms;
 use Filament\Tables;
-use Filament\Resources\Resource;
+use App\Models\Materi;
+use App\Models\Training;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
-use App\Filament\Resources\TrainingResource\Pages;
-use Filament\Tables\Actions\ViewAction;
+use Filament\Resources\Resource;
+use Illuminate\Support\Facades\Gate;
 use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Actions\DeleteAction;
+use App\Filament\Resources\TrainingResource\Pages;
 
 class TrainingResource extends Resource
 {
@@ -31,6 +32,10 @@ class TrainingResource extends Resource
                 ->label('Pilih Materi')
                 ->options(Materi::pluck('judul_materi', 'id'))
                 ->searchable()
+                ->required(),
+            Forms\Components\Select::make('sertifikasi_id')
+                ->label('Pilih Sertifikasi')
+                ->relationship('sertifikasi', 'nama_sertifikasi')
                 ->required(),
             Forms\Components\TextInput::make('kuota_peserta')->label('Kuota Peserta')->numeric()->required(),
             Forms\Components\TextInput::make('lokasi')->label('Lokasi Pelatihan')->maxLength(256)->required(),
@@ -62,5 +67,10 @@ class TrainingResource extends Resource
             'create' => Pages\CreateTraining::route('/create'),
             'edit' => Pages\EditTraining::route('/{record}/edit'),
         ];
+    }
+
+    public static function canAccess(): bool
+    {
+        return Gate::allows('akses pelatihan');
     }
 }

@@ -8,6 +8,8 @@ use Filament\Tables\Table;
 use App\Models\Recruitment;
 use Filament\Resources\Resource;
 use Filament\Tables\Actions\Action;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Actions\ViewAction;
@@ -16,7 +18,6 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\DatePicker;
 use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Resources\RecruitmentResource\Pages;
-use Illuminate\Support\Facades\Auth;
 
 class RecruitmentResource extends Resource
 {
@@ -128,15 +129,20 @@ class RecruitmentResource extends Resource
         ];
     }
 
-    // public static function getEloquentQuery(): Builder
-    // {
-    //     // owner only sees miliknya
-    //     return parent::getEloquentQuery()
-    //         ->where('company_id', Auth::id());
-    // }
+    public static function getEloquentQuery(): Builder
+    {
+        // owner only sees miliknya
+        return parent::getEloquentQuery()
+            ->where('company_id', Auth::id());
+    }
 
     protected static function getAgencyOptions()
     {
         return User::role('agen')->pluck('name', 'id');
+    }
+
+    public static function canAccess(): bool
+    {
+        return Gate::allows('akses rekrutment');
     }
 }

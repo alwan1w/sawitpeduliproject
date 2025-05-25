@@ -1,18 +1,19 @@
 <?php
 namespace App\Filament\Resources;
 
-use App\Models\Recruitment;
 use Filament\Forms;
-use Filament\Infolists\Infolist;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Resources\Resource;
 use Filament\Tables\Table;
-use Filament\Tables\Columns\TextColumn;
+use App\Models\Recruitment;
+use Filament\Infolists\Infolist;
+use Filament\Resources\Resource;
+use Illuminate\Support\Facades\Gate;
 use Filament\Tables\Actions\ViewAction;
-use Filament\Tables\Actions\Action as TableAction;
+use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Builder;
-use App\Filament\Resources\LowonganResource\Pages\ListLowongans;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Tables\Actions\Action as TableAction;
 use App\Filament\Resources\LowonganResource\Pages\ViewLowongan;
+use App\Filament\Resources\LowonganResource\Pages\ListLowongans;
 
 class LowonganResource extends Resource
 {
@@ -93,5 +94,10 @@ class LowonganResource extends Resource
                 ->label('Tanggal Ditutup')
                 ->formatStateUsing(fn ($state) => $state ? $state->format('d M Y') : '—'),
         ]);
+    }
+
+    public static function canAccess(): bool
+    {
+        return Gate::allows('akses lowongan');
     }
 }

@@ -10,6 +10,7 @@ use Filament\Resources\Resource;
 use Illuminate\Support\Facades\DB;
 use Filament\Tables\Actions\Action;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Gate;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Notifications\Notification;
@@ -107,5 +108,10 @@ class WorkerResource extends Resource
             'index' => Pages\ListWorkers::route('/'),
             // 'view' => Pages\ViewWorker::route('/{record}'), // Tambahkan halaman view
         ];
+    }
+
+    public static function canAccess(): bool
+    {
+        return Gate::allows('akses kelola pekerja agen');
     }
 }

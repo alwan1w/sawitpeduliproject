@@ -8,6 +8,7 @@ use Filament\Resources\Resource;
 use Illuminate\Support\Facades\DB;
 use Filament\Tables\Actions\Action;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\DatePicker;
@@ -91,5 +92,10 @@ class CompanyWorkerResource extends Resource
         // hanya pekerja untuk perusahaan login
         return parent::getEloquentQuery()
             ->where('company_id', Auth::id());
+    }
+
+    public static function canAccess(): bool
+    {
+        return Gate::allows('akses kelola pekerja perusahaan');
     }
 }

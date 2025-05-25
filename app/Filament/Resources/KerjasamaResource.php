@@ -2,12 +2,13 @@
 
 namespace App\Filament\Resources;
 
-use App\Models\Recruitment;
 use Filament\Forms;
 use Filament\Tables;
+use App\Models\Recruitment;
 use Filament\Resources\Resource;
-use Illuminate\Support\Facades\Auth;
 use Filament\Tables\Actions\Action;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Builder;
@@ -76,7 +77,7 @@ class KerjasamaResource extends Resource
                     $record->update([
                         'agency_id' => Auth::id(),
                         'status' => 'mencari_pekerja',
-                        'agency_status' => 'menunggu',
+                        'agency_status' => 'diterima',
                         'required_documents' => $data['required_documents'],
                         'selection_process' => $data['selection_process'],
                     ]);
@@ -120,5 +121,10 @@ class KerjasamaResource extends Resource
                 $query->whereNull('agency_id')
                       ->orWhere('agency_id', Auth::id());
             });
+    }
+
+    public static function canAccess(): bool
+    {
+        return Gate::allows('akses kerjasama');
     }
 }

@@ -2,20 +2,21 @@
 
 namespace App\Filament\Resources;
 
-use App\Models\Legalitas;
 use Filament\Forms\Form;
+use App\Models\Legalitas;
 use Filament\Tables\Table;
-use Illuminate\Support\Facades\Auth;
 use Filament\Resources\Resource;
-use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\TextInput;
+use Filament\Tables\Actions\Action;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\TextInput;
+use Filament\Tables\Columns\BadgeColumn;
+use Filament\Forms\Components\FileUpload;
 use Filament\Tables\Actions\DeleteAction;
 use App\Filament\Resources\LegalitasResource\Pages;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Actions\Action;
-use Filament\Tables\Columns\BadgeColumn;
 
 class LegalitasResource extends Resource
 {
@@ -124,5 +125,10 @@ class LegalitasResource extends Resource
         $data['agency_id'] = Auth::id();
         $data['status'] = 'draft';
         return $data;
+    }
+
+    public static function canAccess(): bool
+    {
+        return Gate::allows('akses legalitas');
     }
 }

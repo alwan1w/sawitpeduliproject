@@ -11,6 +11,7 @@ use App\Models\Recruitment;
 use Illuminate\Support\Str;
 use Filament\Resources\Resource;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\BadgeColumn;
@@ -129,5 +130,10 @@ class LamaranMasukResource extends Resource
         // Hanya lamaran untuk recruitment yang di-handle agent ini
         return parent::getEloquentQuery()
             ->whereHas('recruitment', fn ($q) => $q->where('agency_id', Auth::id()));
+    }
+
+    public static function canAccess(): bool
+    {
+        return Gate::allows('akses lamaran masuk');
     }
 }

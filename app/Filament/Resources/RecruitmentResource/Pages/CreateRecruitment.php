@@ -15,6 +15,9 @@ class CreateRecruitment extends CreateRecord
     {
 
         $data['status'] = 'mencari_agen';
+        $data['agency_status'] = 'menunggu';
+
         return $data;
+
     }
 }

@@ -8,6 +8,7 @@ use App\Models\Company;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Columns\TextColumn;
@@ -68,11 +69,14 @@ class CompanyResource extends Resource
 
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
-        return parent::getEloquentQuery()->withCount(['workers']);
+        return parent::getEloquentQuery()
+        ->withCount(['workers'])
+        ->where('id', Auth::id());
     }
 
     public static function canAccess(): bool
     {
-        return Gate::allows('akses_perusahaan');
+        return Gate::allows('akses perusahaan');
     }
+
 }

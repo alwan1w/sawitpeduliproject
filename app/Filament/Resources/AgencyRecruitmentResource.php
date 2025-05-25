@@ -10,6 +10,7 @@ use App\Models\Recruitment;
 use Filament\Resources\Resource;
 use Filament\Tables\Actions\Action;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
@@ -146,5 +147,10 @@ class AgencyRecruitmentResource extends Resource
         return parent::getEloquentQuery()
             ->where('agency_id', Auth::id())
             ->where('status', 'mencari_pekerja');
+    }
+
+    public static function canAccess(): bool
+    {
+        return Gate::allows('akses rekrut pekerja');
     }
 }

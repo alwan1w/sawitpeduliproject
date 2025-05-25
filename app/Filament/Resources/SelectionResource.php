@@ -13,6 +13,7 @@ use Illuminate\Support\Str;
 use Filament\Resources\Resource;
 use Filament\Tables\Actions\Action;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Actions\ViewAction;
@@ -160,5 +161,10 @@ class SelectionResource extends Resource
         return parent::getEloquentQuery()
             ->where('status', 'seleksi')
             ->whereHas('recruitment', fn ($q) => $q->where('agency_id', Auth::id()));
+    }
+
+    public static function canAccess(): bool
+    {
+        return Gate::allows('akses seleksi');
     }
 }

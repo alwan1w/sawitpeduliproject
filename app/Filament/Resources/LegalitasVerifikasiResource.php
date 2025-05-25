@@ -9,6 +9,7 @@ use App\Models\Legalitas;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
 use Filament\Tables\Actions\Action;
+use Illuminate\Support\Facades\Gate;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
@@ -122,5 +123,10 @@ class LegalitasVerifikasiResource extends Resource
     public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
     {
         return parent::getEloquentQuery()->where('status', 'menunggu_verifikasi');
+    }
+
+    public static function canAccess(): bool
+    {
+        return Gate::allows('akses verifikasi legalitas');
     }
 }

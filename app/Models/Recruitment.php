@@ -26,6 +26,7 @@ class Recruitment extends Model
         'agency_id',
         'required_documents',
         'selection_process',
+        'agency_status',
     ];
 
     protected $casts = [

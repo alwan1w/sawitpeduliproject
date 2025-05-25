@@ -14,6 +14,7 @@ use Filament\Resources\Resource;
 use Illuminate\Support\Facades\DB;
 use Filament\Tables\Actions\Action;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Tables\Actions\EditAction;
@@ -204,5 +205,10 @@ class ApplicationResource extends Resource
         // hanya lamaran user tersebut
         return parent::getEloquentQuery()
             ->where('user_id', Auth::id());
+    }
+
+    public static function canAccess(): bool
+    {
+        return Gate::allows('akses lamaran');
     }
 }
