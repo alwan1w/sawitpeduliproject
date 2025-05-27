@@ -103,16 +103,20 @@ class SelectionResource extends Resource
             TextColumn::make('birth_date')->label('Tanggal Lahir')->date('d F Y'),
             TextColumn::make('address')->label('Alamat')->limit(30),
             TextColumn::make('dokumen_status')
-                ->label('Dokumen')
-                ->formatStateUsing(function ($record) {
-                    $requiredDocs = $record->recruitment->required_documents ?? [];
-                    $documents = $record->documents ?? [];
-                    $missing = array_diff(array_map(fn($doc) => \Illuminate\Support\Str::slug($doc, '_'), $requiredDocs), array_keys($documents));
+            ->label('Dokumen')
+            ->state(function ($record) {
+                $requiredDocs = $record->recruitment->required_documents ?? [];
+                $documents = $record->documents ?? [];
+                $missing = array_diff(
+                    array_map(fn($doc) => \Illuminate\Support\Str::slug($doc, '_'), $requiredDocs),
+                    array_keys($documents)
+                );
 
-                    return empty($missing)
-                        ? '<span style="color: green;">Lengkap</span>'
-                        : '<span style="color: red;">Kurang: ' . implode(', ', array_map(fn($slug) => \Illuminate\Support\Str::title(str_replace('_', ' ', $slug)), $missing)) . '</span>';
-                })->html(),
+                return empty($missing)
+                    ? '<span style="color: green;">Lengkap</span>'
+                    : '<span style="color: red;">Kurang: ' . implode(', ', array_map(fn($slug) => \Illuminate\Support\Str::title(str_replace('_', ' ', $slug)), $missing)) . '</span>';
+            })
+            ->html(),
             TextColumn::make('status')->badge(),
         ])
         ->actions([

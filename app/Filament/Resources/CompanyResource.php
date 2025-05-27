@@ -32,6 +32,8 @@ class CompanyResource extends Resource
     public static function form(Form $form): Form
     {
         return $form->schema([
+            Forms\Components\Hidden::make('user_id')
+                ->default(fn () => Auth::id()),
             Forms\Components\TextInput::make('name')->label('Nama Perusahaan')->required(),
             Forms\Components\TextInput::make('director')->label('Nama Direktur')->required(),
             Forms\Components\TextInput::make('phone')->label('Kontak'),
@@ -72,6 +74,12 @@ class CompanyResource extends Resource
         return parent::getEloquentQuery()
         ->withCount(['workers'])
         ->where('id', Auth::id());
+    }
+
+    public static function canCreate(): bool
+    {
+        // Jika company dengan user_id ini sudah ada, maka tidak bisa create lagi
+        return !Company::where('id', Auth::id())->exists();
     }
 
     public static function canAccess(): bool

@@ -10,6 +10,7 @@ use Filament\Resources\Resource;
 use Illuminate\Support\Facades\DB;
 use Filament\Tables\Actions\Action;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
@@ -47,9 +48,10 @@ class WorkerResource extends Resource
                 ->label('Telepon')
                 ->searchable(),
 
-            TextColumn::make('end_date')
+            TextColumn::make('batas_kontrak')
                 ->label('Batas Kontrak')
-                ->date('d F Y'),
+                ->date('d F Y')
+                ->sortable(),
 
         ])
         ->defaultSort('start_date', 'desc')
@@ -88,18 +90,11 @@ class WorkerResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        $query = parent::getEloquentQuery()
-            ->whereHas('application', function (Builder $query) {
-                $query->where('status', 'Dikonfirmasi');
-            });
+        return parent::getEloquentQuery()
+            ->with(['application.recruitment', 'application.user', 'company'])
+            ->whereHas('application', fn ($q) => $q->where('status', 'Dikonfirmasi'))
+            ->whereHas('application.recruitment', fn ($q) => $q->where('agency_id', Auth::id()));
 
-        // Debugging: Log hasil query
-        Log::debug('WorkerResource Query Result:', [
-            'workers' => $query->get()->toArray(),
-            'total' => $query->count(),
-        ]);
-
-        return $query;
     }
 
     public static function getPages(): array

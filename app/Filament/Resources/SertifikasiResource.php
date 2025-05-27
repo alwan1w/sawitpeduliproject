@@ -8,6 +8,7 @@ use Filament\Forms\Form;
 use Filament\Tables\Table;
 use App\Models\Sertifikasi;
 use Filament\Resources\Resource;
+use Illuminate\Support\Facades\Gate;
 use Filament\Forms\Components\TextInput;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -58,5 +59,10 @@ class SertifikasiResource extends Resource
             'create' => Pages\CreateSertifikasi::route('/create'),
             'edit' => Pages\EditSertifikasi::route('/{record}/edit'),
         ];
+    }
+
+    public static function canAccess(): bool
+    {
+        return Gate::allows('sertifikasi');
     }
 }

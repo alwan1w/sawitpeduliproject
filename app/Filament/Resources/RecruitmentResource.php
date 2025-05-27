@@ -29,10 +29,9 @@ class RecruitmentResource extends Resource
     public static function form(Form $form): Form
     {
         return $form->schema([
-            Select::make('company_id')
-                ->relationship('company', 'name')
-                ->label('Perusahaan')
-                ->required(),
+            \Filament\Forms\Components\Hidden::make('company_id')
+            ->default(fn () => \App\Models\Company::where('id', Auth::id())->value('id'))
+            ->required(),
 
             Select::make('agency_id')
                 ->label('Agen Tujuan')
@@ -138,7 +137,10 @@ class RecruitmentResource extends Resource
 
     protected static function getAgencyOptions()
     {
-        return User::role('agen')->pluck('name', 'id');
+        // hanya tampilkan agency dengan legalitas 'terverifikasi'
+        return User::role('agen')
+            ->whereHas('legalitas', fn($q) => $q->where('status', 'terverifikasi'))
+            ->pluck('name', 'id');
     }
 
     public static function canAccess(): bool

@@ -45,20 +45,17 @@ class ApplicationResource extends Resource
             Hidden::make('status')
                 ->default('masuk'),
 
+            \Filament\Forms\Components\Placeholder::make('info_lowongan')
+                ->label('Lowongan')
+                ->content(function () {
+                    $recruitment = \App\Models\Recruitment::find(request()->get('recruitment_id'));
+                    return $recruitment
+                        ? "{$recruitment->company->name} - {$recruitment->position}"
+                        : '-';
+                }),
             // Pilih lowongan
-            Select::make('recruitment_id')
-                ->label('Pilih Lowongan')
-                ->options(
-                    Recruitment::query()
-                        ->where('status', 'mencari_pekerja')
-                        ->with('company')
-                        ->get()
-                        ->mapWithKeys(fn($r) => [
-                            $r->id => "{$r->company->name} - {$r->position}"
-                        ])
-                        ->toArray()
-                )
-                ->reactive()
+            Hidden::make('recruitment_id')
+                ->default(fn () => request()->get('recruitment_id'))
                 ->required(),
 
             TextInput::make('name')
@@ -137,13 +134,15 @@ class ApplicationResource extends Resource
             ])
             ->actions([
                 ViewAction::make(),
-                EditAction::make(),
+                EditAction::make()
+                    ->visible(fn ($record) => in_array($record->status, ['masuk', 'seleksi'])),
+
                 Action::make('konfirmasi')
                     ->label('Konfirmasi Bergabung')
                     ->color('success')
                     ->icon('heroicon-o-check')
                     ->requiresConfirmation()
-                    ->action(function ($record) {
+                    ->action(function ($record, $livewire) {
                         DB::transaction(function () use ($record) {
                             // Cek apakah sudah ada Worker dengan user_id ini
                             $workerExists = Worker::where('user_id', $record->user_id)->exists();
@@ -184,6 +183,22 @@ class ApplicationResource extends Resource
                                 'batas_kontrak'  => $batasKontrak,
                             ]);
                         });
+                          // 7. Jika yang klik konfirmasi adalah user yang bersangkutan, paksa logout dan redirect
+                            if ($record->user_id == Auth::id()) {
+                                // Kirim notifikasi sukses sebelum logout
+                                Notification::make()
+                                    ->title('Role anda telah berubah menjadi pekerja. Silakan login ulang untuk melanjutkan.')
+                                    ->success()
+                                    ->send();
+
+                                // Logout user
+                                Auth::logout();
+
+                                // Redirect ke login page Filament
+                                // $livewire->redirectRoute('filament.auth.login');    // Ini untuk Filament 3.x ke atas
+                                // Untuk Filament versi lain, sesuaikan dengan route login Filament kamu:
+                                $livewire->redirect('/dashboard/login'); // sesuaikan dengan route login Filament
+                            }
                     })
                     ->visible(fn ($record) => $record->status === 'diterima'),
             ]);
@@ -205,6 +220,11 @@ class ApplicationResource extends Resource
         // hanya lamaran user tersebut
         return parent::getEloquentQuery()
             ->where('user_id', Auth::id());
+    }
+
+    public static function canEdit($record): bool
+    {
+        return in_array($record->status, ['masuk', 'seleksi']);
     }
 
     public static function canAccess(): bool

@@ -9,6 +9,7 @@ use Filament\Tables\Table;
 use Filament\Resources\Resource;
 use App\Models\TrainingParticipant;
 use Filament\Tables\Actions\Action;
+use Illuminate\Support\Facades\Gate;
 use Filament\Tables\Columns\TextColumn;
 use App\Models\TrainingParticipantPemkab;
 use Illuminate\Database\Eloquent\Builder;
@@ -85,5 +86,10 @@ class TrainingParticipantPemkabResource extends Resource
             'create' => Pages\CreateTrainingParticipantPemkab::route('/create'),
             'edit' => Pages\EditTrainingParticipantPemkab::route('/{record}/edit'),
         ];
+    }
+
+    public static function canAccess(): bool
+    {
+        return Gate::allows('peserta pelatihan');
     }
 }

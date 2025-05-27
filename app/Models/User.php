@@ -33,4 +33,8 @@ class User extends Authenticatable
         ];
     }
 
+    public function legalitas()
+    {
+        return $this->hasOne(Legalitas::class, 'agency_id');
+    }
 }

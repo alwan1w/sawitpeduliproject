@@ -13,7 +13,7 @@ use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\DatePicker;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Notification;
+use Filament\Notifications\Notification;
 use App\Filament\Resources\CompanyWorkerResource\Pages;
 
 class CompanyWorkerResource extends Resource
@@ -27,14 +27,14 @@ class CompanyWorkerResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('application.name')->label('Nama'),
-                TextColumn::make('application.recruitment.company.name')->label('Agen'),
+                TextColumn::make('application.name')->label('Nama') ->searchable(),
+                TextColumn::make('application.recruitment.company.name')->label('Agen')->searchable(),
                 TextColumn::make('batas_kontrak')->label('Batas Kontrak')->date('d M Y'),
-                TextColumn::make('status_kontrak')->label('Status'),
+                TextColumn::make('status_kontrak')->label('Status')->searchable(),
             ])
             ->actions([
                 // detail modal
-                ViewAction::make(),
+                // ViewAction::make(),
 
                 // Putus Kontrak
                 Action::make('putus')
@@ -53,15 +53,17 @@ class CompanyWorkerResource extends Resource
                             if ($record->user) {
                                 $record->user->syncRoles(['pelamar']);
                             }
+
+                            $record->delete();
                         });
 
                         Notification::make()
                             ->title('Kontrak pekerja telah diputus. Role dikembalikan menjadi pelamar.')
                             ->success()
                             ->send();
-                    })
+                    }),
 
-                    ->visible(fn ($record) => $record->status_kontrak !== 'putus'),
+                    // ->visible(fn ($record) => $record->status_kontrak !== 'putus'),
 
 
                 // Perpanjang Kontrak
@@ -76,7 +78,8 @@ class CompanyWorkerResource extends Resource
                             'batas_kontrak' => $data['batas_kontrak'],
                             'status_kontrak' => 'aktif',
                         ])
-                    ),
+                    )
+                    // ->visible(fn ($record) => $record->status_kontrak !== 'putus'),
             ]);
     }
 

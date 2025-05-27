@@ -7,14 +7,15 @@ use Filament\Tables\Table;
 use Filament\Resources\Resource;
 use App\Models\TrainingParticipant;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\DatePicker;
+use App\Filament\Resources\TrainingParticipantResource\Pages\EditTrainingParticipant;
 use App\Filament\Resources\TrainingParticipantResource\Pages\ListTrainingParticipants;
 use App\Filament\Resources\TrainingParticipantResource\Pages\CreateTrainingParticipant;
-use App\Filament\Resources\TrainingParticipantResource\Pages\EditTrainingParticipant;
 
 class TrainingParticipantResource extends Resource
 {
@@ -82,5 +83,10 @@ class TrainingParticipantResource extends Resource
             'create'=> CreateTrainingParticipant::route('/create'),
             'edit'  => EditTrainingParticipant::route('/{record}/edit'),
         ];
+    }
+
+    public static function canAccess(): bool
+    {
+        return Gate::allows('pendaftaran pelatihan');
     }
 }

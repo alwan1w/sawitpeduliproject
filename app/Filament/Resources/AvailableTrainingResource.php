@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\AvailableTrainingResource\Pages\ListAvailableTrainings;
 use Filament\Tables;
 use App\Models\Training;
 use Filament\Forms\Form;
@@ -10,7 +9,9 @@ use Filament\Tables\Table;
 use Filament\Resources\Resource;
 use Filament\Tables\Actions\Action;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Filament\Tables\Columns\TextColumn;
+use App\Filament\Resources\AvailableTrainingResource\Pages\ListAvailableTrainings;
 
 class AvailableTrainingResource extends Resource
 {
@@ -76,5 +77,10 @@ class AvailableTrainingResource extends Resource
         return [
             'index' => ListAvailableTrainings::route('/'),
         ];
+    }
+
+    public static function canAccess(): bool
+    {
+        return Gate::allows('daftar pelatihan');
     }
 }

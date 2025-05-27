@@ -6,6 +6,7 @@ use Filament\Tables\Table;
 use App\Models\Recruitment;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
@@ -45,7 +46,14 @@ class LowonganResource extends Resource
                     ->url(fn (Recruitment $r) => \App\Filament\Resources\ApplicationResource::getUrl('create', [
                         'recruitment_id' => $r->id,
                     ]))
-                    ->color('primary'),
+                    ->color('primary')
+                    ->visible(function (Recruitment $r) {
+                        $sudahMelamar = \App\Models\Application::where('user_id', Auth::id())
+                            ->where('recruitment_id', $r->id)
+                            ->exists();
+                        return ! $sudahMelamar;
+                    }),
+
             ]);
     }
 
