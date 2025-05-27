@@ -37,4 +37,10 @@ class User extends Authenticatable
     {
         return $this->hasOne(Legalitas::class, 'agency_id');
     }
+
+    public function applications()
+    {
+        return $this->hasMany(\App\Models\Application::class, 'user_id');
+    }
+
 }

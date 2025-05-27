@@ -20,7 +20,10 @@ use App\Filament\Resources\TrainingParticipantPemkabResource\RelationManagers;
 class TrainingParticipantPemkabResource extends Resource
 {
     protected static ?string $model = TrainingParticipant::class;
+    protected static ?string $navigationIcon = 'heroicon-o-users';
     protected static ?string $navigationLabel = 'Peserta Pelatihan';
+    protected static ?string $navigationGroup = 'Pemkab';
+
 
     public static function form(Form $form): Form
     {

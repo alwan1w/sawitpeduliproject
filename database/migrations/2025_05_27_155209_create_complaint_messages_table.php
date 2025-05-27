@@ -11,11 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('complaints', function (Blueprint $table) {
+        Schema::create('complaint_messages', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('worker_id')->constrained('users'); // atau 'workers' jika ada tabel workers
-            $table->string('subject');
-            $table->enum('status', ['diajukan', 'diproses', 'selesai'])->default('diajukan');
+            $table->foreignId('complaint_id')->constrained()->onDelete('cascade');
+            $table->enum('sender_type', ['worker', 'pemkab']);
+            $table->unsignedBigInteger('sender_id');
+            $table->text('message');
             $table->timestamps();
         });
     }
@@ -25,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('complaints');
+        Schema::dropIfExists('complaint_messages');
     }
 };
