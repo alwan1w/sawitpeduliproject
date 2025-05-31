@@ -6,19 +6,39 @@
     <div style="height:400px; overflow-y:auto; background:var(--tw-bg-opacity, 1) #f4f8fb; padding: 1rem; border-radius:8px; margin-bottom:1rem;">
         @foreach ($messages as $msg)
             @php
-                $isWorker = $msg->sender_type === 'worker';
-                $bubbleBg = $isWorker ? '#16a34a' : '#2563eb';
-                $align = $isWorker ? 'flex-end' : 'flex-start'; // PEKERJA KANAN, PEMKAB KIRI
-                $name = $isWorker ? ($msg->sender->name ?? 'Pekerja') : 'Pemkab';
-                $marginSide = $isWorker ? 'margin-left:auto;' : 'margin-right:auto;';
-                $nameAlign = $isWorker ? 'text-align:right;' : '';
+                // BUBBLE CONFIG
+                if ($msg->sender_type === 'worker') {
+                    $bubbleBg = '#2563eb'; // biru
+                    $align = 'flex-end';   // pekerja di kanan
+                    $name = $msg->sender->name ?? 'Pekerja';
+                    $margin = 'margin-left:auto;';
+                    $nameAlign = 'text-align:right;';
+                } elseif ($msg->sender_type === 'pemkab') {
+                    $bubbleBg = '#16a34a'; // hijau
+                    $align = 'flex-start'; // pemkab di kiri
+                    $name = 'Pemkab';
+                    $margin = 'margin-right:auto;';
+                    $nameAlign = '';
+                } elseif ($msg->sender_type === 'pengawas') {
+                    $bubbleBg = '#f59e42'; // oranye
+                    $align = 'flex-start'; // pengawas di kiri (atau 'flex-end' jika ingin kanan saat login sebagai pengawas)
+                    $name = $msg->sender->name ?? 'Pengawas';
+                    $margin = 'margin-right:auto;';
+                    $nameAlign = '';
+                } else {
+                    $bubbleBg = '#666';    // fallback abu
+                    $align = 'flex-start';
+                    $name = 'Unknown';
+                    $margin = 'margin-right:auto;';
+                    $nameAlign = '';
+                }
             @endphp
-            <div style="margin-bottom:18px; display:flex; justify-content:{{ $align }};">
+            <div style="margin-bottom: 16px; display: flex; justify-content: {{ $align }};">
                 <div style="display:block; width:100%;">
-                    <div style="font-size:12px; font-weight:bold; color:{{ $isWorker ? '#16a34a' : '#2563eb' }}; margin-bottom:3px; {{ $nameAlign }}">
+                    <div style="font-size:12px; font-weight:bold; color:{{ $bubbleBg }}; margin-bottom:2px; {{ $nameAlign }}">
                         {{ $name }}
                     </div>
-                    <div style="max-width:65%; min-width:80px; background:{{ $bubbleBg }}; color:#fff; padding:12px 16px; border-radius:16px; font-size:1rem; {{ $marginSide }}">
+                    <div style="max-width:65%; min-width:80px; background:{{ $bubbleBg }}; color:#fff; padding:12px 16px; border-radius:16px; font-size:1rem; {{ $margin }}">
                         {{ $msg->message }}
                         <div style="font-size:11px; color:#ffffff; text-align:right; margin-top:6px;">
                             {{ $msg->created_at->timezone('Asia/Jakarta')->format('H:i') }}

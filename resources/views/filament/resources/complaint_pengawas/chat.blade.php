@@ -5,35 +5,33 @@
 
     <div style="height:400px; overflow-y:auto; background:var(--tw-bg-opacity, 1) #f4f8fb; padding: 1rem; border-radius:8px; margin-bottom:1rem;">
         @foreach ($messages as $msg)
-            @php
-                // BUBBLE CONFIG
+           @php
                 if ($msg->sender_type === 'worker') {
                     $bubbleBg = '#2563eb'; // biru
-                    $align = 'flex-start'; // pekerja di kiri
+                    $align = 'flex-start'; // kiri
                     $name = $msg->sender->name ?? 'Pekerja';
                     $margin = 'margin-right:auto;';
                     $nameAlign = '';
                 } elseif ($msg->sender_type === 'pemkab') {
                     $bubbleBg = '#16a34a'; // hijau
-                    $align = 'flex-end';   // pemkab di kanan
+                    $align = 'flex-start'; // kiri
                     $name = 'Pemkab';
-                    $margin = 'margin-left:auto;';
-                    $nameAlign = 'text-align:right;';
-                } elseif ($msg->sender_type === 'pengawas') {
-                    $bubbleBg = '#f59e42'; // oranye
-                    $align = 'flex-start'; // pengawas di kiri
-                    $name = $msg->sender->name ?? 'Pengawas';
                     $margin = 'margin-right:auto;';
                     $nameAlign = '';
+                } elseif ($msg->sender_type === 'pengawas') {
+                    $bubbleBg = '#f59e42'; // oranye
+                    $align = 'flex-end'; // kanan
+                    $name = $msg->sender->name ?? 'Pengawas';
+                    $margin = 'margin-left:auto;';
+                    $nameAlign = 'text-align:right;';
                 } else {
-                    $bubbleBg = '#666';    // fallback abu
+                    $bubbleBg = '#666'; // fallback abu
                     $align = 'flex-start';
                     $name = 'Unknown';
                     $margin = 'margin-right:auto;';
                     $nameAlign = '';
                 }
             @endphp
-
             <div style="margin-bottom: 16px; display: flex; justify-content: {{ $align }};">
                 <div style="display:block; width:100%;">
                     <div style="font-size:12px; font-weight:bold; color:{{ $bubbleBg }}; margin-bottom:2px; {{ $nameAlign }}">
