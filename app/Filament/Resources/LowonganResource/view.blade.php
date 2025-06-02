@@ -10,6 +10,23 @@
         <p><strong>Keahlian:</strong> {{ $record->skills }}</p>
         <p><strong>Rentang Usia:</strong> {{ $record->age_range }}</p>
         <p><strong>Pendidikan Minimal:</strong> {{ $record->education }}</p>
+        <p><strong>Sertifikasi Wajib:</strong>
+            @php
+                $ids = $record->required_certifications;
+
+                if (is_string($ids)) {
+                    $ids = json_decode($ids, true) ?? [];
+                }
+
+                $ids = collect($ids)->map(fn($id) => (int) $id)->all();
+
+                $sertifikasis = \App\Models\Sertifikasi::whereIn('id', $ids)->pluck('nama_sertifikasi')->toArray();
+            @endphp
+
+            {{ count($sertifikasis) ? implode(', ', $sertifikasis) : '-' }}
+        </p>
+
+
         <p><strong>Dokumen yang Diperlukan:</strong>
             {{ implode(', ', $record->required_documents ?? []) }}
         </p>

@@ -10,6 +10,7 @@ use Filament\Tables\Table;
 use Filament\Resources\Resource;
 use App\Models\ComplaintPengawas;
 use Illuminate\Support\HtmlString;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\ComplaintPengawasResource\Pages;
@@ -107,5 +108,10 @@ class ComplaintPengawasResource extends Resource
             'edit' => Pages\EditComplaintPengawas::route('/{record}/edit'),
             'view' => Pages\ViewComplaintPengawas::route('/{record}'),
         ];
+    }
+
+    public static function canAccess(): bool
+    {
+        return Gate::allows('pengaduan masuk pengawas');
     }
 }

@@ -21,6 +21,8 @@ class TrainingParticipantResource extends Resource
 {
     protected static ?string $model = TrainingParticipant::class;
     protected static ?string $navigationLabel = 'Pendaftaran Pelatihan';
+    protected static ?string $navigationIcon  = 'heroicon-o-document-text';
+    protected static ?string $navigationGroup = 'Pelamar';
 
     public static function form(Form $form): Form
     {

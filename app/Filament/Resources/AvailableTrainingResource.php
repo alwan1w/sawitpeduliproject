@@ -16,6 +16,8 @@ use App\Filament\Resources\AvailableTrainingResource\Pages\ListAvailableTraining
 class AvailableTrainingResource extends Resource
 {
     protected static ?string $model = Training::class;
+    protected static ?string $navigationGroup = 'Pelamar';
+    protected static ?string $navigationIcon  = 'heroicon-o-document-text';
     protected static ?string $navigationLabel = 'Daftar Pelatihan';
 
     public static function form(Form $form): Form

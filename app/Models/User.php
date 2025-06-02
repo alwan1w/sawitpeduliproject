@@ -7,9 +7,12 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Spatie\Permission\Traits\HasRoles;
 
+
 /**
- * @method bool hasRole(string $role)
+ * @method \Illuminate\Database\Eloquent\Relations\BelongsToMany trainings()
+ * @method bool hasCertification(int|string $sertifikasiId)
  */
+
 class User extends Authenticatable
 {
     use HasFactory, Notifiable, HasRoles;
@@ -41,6 +44,32 @@ class User extends Authenticatable
     public function applications()
     {
         return $this->hasMany(\App\Models\Application::class, 'user_id');
+    }
+
+    /**
+     * Relasi dengan model Training melalui tabel pivot training_participants.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function trainings()
+    {
+        return $this->belongsToMany(Training::class, 'training_participants', 'user_id', 'training_id')
+                    ->withPivot('status')
+                    ->withTimestamps();
+    }
+
+    /**
+     * Mengecek apakah user memiliki sertifikasi dengan ID tertentu.
+     *
+     * @param int|string $sertifikasiId
+     * @return bool
+     */
+    public function hasCertification($sertifikasiId)
+    {
+        return $this->trainings()
+            ->where('sertifikasi_id', $sertifikasiId)
+            ->wherePivot('status', 'kompeten')
+            ->exists();
     }
 
 }

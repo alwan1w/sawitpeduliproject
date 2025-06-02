@@ -24,6 +24,14 @@ class KerjasamaResource extends Resource
     public static function form(Forms\Form $form): Forms\Form
     {
         return $form->schema([
+            Forms\Components\Textarea::make('required_certifications')
+            ->label('Sertifikasi Wajib')
+            ->disabled()
+            ->formatStateUsing(function ($state) {
+                return $state && is_array($state)
+                    ? \App\Models\Sertifikasi::whereIn('id', $state)->pluck('nama_sertifikasi')->implode(', ')
+                    : '-';
+            }),
             Forms\Components\TextInput::make('position')->label('Posisi')->disabled(),
             Forms\Components\Textarea::make('detail_posisi')->label('Detail Posisi')->disabled(),
             Forms\Components\TextInput::make('requirement_total')->label('Jumlah Dibutuhkan')->disabled(),

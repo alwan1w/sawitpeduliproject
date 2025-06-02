@@ -27,10 +27,12 @@ class Recruitment extends Model
         'required_documents',
         'selection_process',
         'agency_status',
+        'required_certifications',
     ];
 
     protected $casts = [
         'required_documents' => 'array',
+        'required_certifications' => 'array',
         'documents'          => 'array',
         'selection_process'  => 'string',   // optional
         'open_date'          => 'date',

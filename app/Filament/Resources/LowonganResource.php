@@ -4,12 +4,15 @@ namespace App\Filament\Resources;
 use Filament\Forms;
 use Filament\Tables\Table;
 use App\Models\Recruitment;
+use App\Models\Sertifikasi;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
+use Filament\Tables\Actions\Action;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Tables\Actions\Action as TableAction;
@@ -43,16 +46,39 @@ class LowonganResource extends Resource
                 TableAction::make('lamar')
                     ->label('Lamar')
                     ->icon('heroicon-o-document-text')
-                    ->url(fn (Recruitment $r) => \App\Filament\Resources\ApplicationResource::getUrl('create', [
-                        'recruitment_id' => $r->id,
-                    ]))
                     ->color('primary')
+                    ->action(function ($record) {
+                        $user = \App\Models\User::find(Auth::id()); // <--- PENTING, cast ke model asli
+
+                        $requiredCerts = $record->required_certifications ?? [];
+
+                        $userHasCerts = collect($requiredCerts)->every(function ($sertifikasiId) use ($user) {
+                            return $user->trainings()
+                                ->where('sertifikasi_id', $sertifikasiId)
+                                ->wherePivot('status', 'kompeten')
+                                ->exists();
+                        });
+
+                        if (!$userHasCerts) {
+                            Notification::make()
+                                ->title('Anda belum memenuhi syarat sertifikasi wajib.')
+                                ->body('Silakan ikuti pelatihan yang relevan terlebih dahulu.')
+                                ->danger()
+                                ->send();
+                            return;
+                        }
+
+                        return redirect(\App\Filament\Resources\ApplicationResource::getUrl('create', [
+                            'recruitment_id' => $record->id,
+                        ]));
+                    })
                     ->visible(function (Recruitment $r) {
-                        $sudahMelamar = \App\Models\Application::where('user_id', Auth::id())
+                        return !\App\Models\Application::where('user_id', Auth::id())
                             ->where('recruitment_id', $r->id)
                             ->exists();
-                        return ! $sudahMelamar;
                     }),
+
+
 
             ]);
     }
@@ -72,7 +98,7 @@ class LowonganResource extends Resource
             ->whereDate('close_date', '>=', today());
     }
 
-     public static function infolist(Infolist $infolist): Infolist
+    public static function infolist(Infolist $infolist): Infolist
     {
         return $infolist->schema([
             TextEntry::make('company.name')->label('Perusahaan'),
@@ -89,18 +115,36 @@ class LowonganResource extends Resource
                 ->formatStateUsing(fn ($state): string =>
                     is_array($state) && count($state)
                         ? implode(', ', $state)
-                        : $state
+                        : (is_string($state) ? $state : '-')
                 ),
+           TextEntry::make('required_certifications')
+                ->label('Sertifikasi Wajib')
+                ->formatStateUsing(function ($state) {
+                    // Jika state berupa string "1, 2" ubah jadi array
+                    if (is_string($state)) {
+                        $ids = array_map('trim', explode(',', $state));
+                    } else {
+                        $ids = $state;
+                    }
 
+                    // Pastikan tipe data integer
+                    $ids = array_map('intval', $ids);
+
+                    if (empty($ids)) return '-';
+
+                    return \App\Models\Sertifikasi::whereIn('id', $ids)
+                        ->pluck('nama_sertifikasi')
+                        ->implode(', ');
+                }),
             TextEntry::make('selection_process')->label('Proses Seleksi'),
 
             TextEntry::make('open_date')
                 ->label('Tanggal Dibuka')
-                ->formatStateUsing(fn ($state) => $state ? $state->format('d M Y') : '—'),
+                ->formatStateUsing(fn ($state) => $state ? \Carbon\Carbon::parse($state)->format('d M Y') : '—'),
 
             TextEntry::make('close_date')
                 ->label('Tanggal Ditutup')
-                ->formatStateUsing(fn ($state) => $state ? $state->format('d M Y') : '—'),
+                ->formatStateUsing(fn ($state) => $state ? \Carbon\Carbon::parse($state)->format('d M Y') : '—'),
         ]);
     }
 

@@ -39,6 +39,13 @@ class RecruitmentResource extends Resource
                 ->searchable()
                 ->required(),
 
+            Select::make('required_certifications')
+                ->label('Sertifikasi Wajib')
+                ->multiple() // untuk multi-pilih
+                ->options(\App\Models\Sertifikasi::pluck('nama_sertifikasi', 'id')) // ambil dari tabel sertifikasis
+                ->searchable()
+                ->helperText('Pilih satu atau lebih sertifikasi yang wajib dimiliki.'),
+
             TextInput::make('position')->label('Posisi')->required(),
             Textarea::make('detail_posisi')->label('Detail Posisi')->rows(3)->columnSpanFull(),
             TextInput::make('requirement_total')->label('Jumlah Kebutuhan')->numeric()->required(),
@@ -77,6 +84,13 @@ class RecruitmentResource extends Resource
                 TextColumn::make('close_date')
                     ->label('Tutup')
                     ->date('d M Y'),
+                TextColumn::make('required_certifications')
+                    ->label('Sertifikasi Wajib')
+                    ->formatStateUsing(fn ($state) =>
+                        $state
+                            ? \App\Models\Sertifikasi::whereIn('id', (array)$state)->pluck('nama_sertifikasi')->implode(', ')
+                            : '-'
+                    ),
                 TextColumn::make('status')
                     ->label('Status Rekrutmen')
                     ->formatStateUsing(fn($state) => match($state) {
