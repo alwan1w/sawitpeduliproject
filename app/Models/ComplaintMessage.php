@@ -10,7 +10,7 @@ class ComplaintMessage extends Model
     use HasFactory;
 
     protected $fillable = [
-        'complaint_id', 'sender_type', 'sender_id', 'message'
+        'complaint_id', 'sender_type', 'sender_id', 'message', 'image',
     ];
 
     public function complaint()

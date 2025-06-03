@@ -38,6 +38,11 @@
                         {{ $name }}
                     </div>
                     <div style="max-width:65%; min-width:80px; background:{{ $bubbleBg }}; color:#fff; padding:12px 16px; border-radius:16px; font-size:1rem; {{ $margin }}">
+                        @if($msg->image)
+                            <a href="{{ Storage::url($msg->image) }}" target="_blank">
+                                <img src="{{ Storage::url($msg->image) }}" alt="image" style="max-width:150px; border-radius:8px; margin-bottom:6px;" />
+                            </a>
+                        @endif
                         {{ $msg->message }}
                         <div style="font-size:11px; color:#ffffff; text-align:right; margin-top:6px;">
                             {{ $msg->created_at->timezone('Asia/Jakarta')->format('H:i') }}
@@ -48,15 +53,16 @@
         @endforeach
     </div>
 
-    <form wire:submit.prevent="sendMessage" style="display: flex; align-items: center;">
-        <textarea wire:model.defer="new_message"
-            placeholder="Tulis pesan..."
-            rows="2"
-            style="width:80%; color: #111; background: #fff; border-radius:5px; padding:8px; margin-right:1%;"
-        ></textarea>
-        <button type="submit"
-            style="width:18%; background:#2563eb; color:white; border:none; border-radius:5px;">
-            Kirim
-        </button>
+    <form wire:submit.prevent="sendMessage" style="display: flex; align-items: center; gap:8px;">
+            <textarea wire:model.defer="new_message"
+                placeholder="Tulis pesan..."
+                rows="2"
+                style="width:65%; color: #111; background: #fff; border-radius:5px; padding:8px;"
+            ></textarea>
+            <input type="file" wire:model="new_image" accept="image/*" style="width:20%;" />
+            <button type="submit"
+                style="width:15%; background:#2563eb; color:white; border:none; border-radius:5px;">
+                Kirim
+            </button>
     </form>
 </div>

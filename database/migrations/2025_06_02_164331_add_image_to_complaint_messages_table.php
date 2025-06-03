@@ -6,23 +6,18 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
+    public function up()
     {
-        Schema::table('complaint_messages', function (Blueprint $table) {
-            //
+        Schema::table('complaint_messages', function (Illuminate\Database\Schema\Blueprint $table) {
+            $table->string('image')->nullable()->after('message');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
+    public function down()
     {
-        Schema::table('complaint_messages', function (Blueprint $table) {
-            //
+        Schema::table('complaint_messages', function (Illuminate\Database\Schema\Blueprint $table) {
+            $table->dropColumn('image');
         });
     }
+
 };
