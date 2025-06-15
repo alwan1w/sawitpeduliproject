@@ -19,6 +19,7 @@ class KerjasamaResource extends Resource
     protected static ?string $model = Recruitment::class;
     protected static ?string $navigationIcon = 'heroicon-o-users';
     protected static ?string $navigationGroup = 'Agency';
+    protected static ?int $navigationSort = 6;
     protected static ?string $navigationLabel = 'Kerjasama';
 
     public static function form(Forms\Form $form): Forms\Form

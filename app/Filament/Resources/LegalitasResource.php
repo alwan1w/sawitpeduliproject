@@ -22,6 +22,7 @@ class LegalitasResource extends Resource
 {
     protected static ?string $model = Legalitas::class;
     protected static ?string $navigationGroup = 'Agency';
+    protected static ?int $navigationSort = 5;
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-check';
     protected static ?string $navigationLabel = 'Legalitas';
 

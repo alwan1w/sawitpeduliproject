@@ -57,7 +57,7 @@ class ComplaintPengawasResource extends Resource
                         $phone = $application->phone ?? '-';
 
                         return new HtmlString("
-                            < <div class='grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4'>
+                            <div class='grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4'>
                                 <div class='font-semibold text-gray-700 dark:text-gray-200 flex items-center'>Nama</div>
                                 <div class='bg-gray-100 dark:bg-gray-800 rounded px-4 py-2 text-gray-900 dark:text-gray-100 flex items-center'>{$worker->name}</div>
 

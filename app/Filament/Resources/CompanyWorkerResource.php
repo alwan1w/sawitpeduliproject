@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Models\Worker;
 use Filament\Tables\Table;
+use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Illuminate\Support\Facades\DB;
 use Filament\Tables\Actions\Action;
@@ -11,9 +12,12 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Notifications\Notification;
 use Filament\Forms\Components\DatePicker;
 use Illuminate\Database\Eloquent\Builder;
-use Filament\Notifications\Notification;
+use Filament\Infolists\Components\Section;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\ImageEntry;
 use App\Filament\Resources\CompanyWorkerResource\Pages;
 
 class CompanyWorkerResource extends Resource
@@ -27,14 +31,20 @@ class CompanyWorkerResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('application.name')->label('Nama') ->searchable(),
-                TextColumn::make('application.recruitment.company.name')->label('Agen')->searchable(),
+                TextColumn::make('application.name')->label('Nama Pekerja') ->searchable(),
+                TextColumn::make('application.recruitment.agency.name')->label('Agen')->searchable(),
                 TextColumn::make('batas_kontrak')->label('Batas Kontrak')->date('d M Y'),
+                TextColumn::make('application.recruitment.position')
+                    ->label('Posisi'),
+
+                TextColumn::make('application.phone')
+                    ->label('Telepon')
+                    ->searchable(),
                 TextColumn::make('status_kontrak')->label('Status')->searchable(),
             ])
             ->actions([
                 // detail modal
-                // ViewAction::make(),
+                ViewAction::make(),
 
                 // Putus Kontrak
                 Action::make('putus')
@@ -87,8 +97,34 @@ class CompanyWorkerResource extends Resource
     {
         return [
             'index' => Pages\ListCompanyWorkers::route('/'),
+
         ];
     }
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist->schema([
+            ImageEntry::make('application.profile_photo')
+                ->label('Foto Profil')
+                ->circular()
+                ->height(80)
+                ->width(80)
+                ->columnSpanFull()
+                ->defaultImageUrl('https://ui-avatars.com/api/?name=Fallback+Worker'),
+
+            Section::make('Data Pekerja')
+            ->columns(2) // opsional, kalau ingin dua kolom
+            ->schema([
+                TextEntry::make('company.name')->label('Perusahaan'),
+                TextEntry::make('application.name')->label('Nama Pekerja'),
+                TextEntry::make('application.recruitment.position')->label('Posisi'),
+                TextEntry::make('application.phone')->label('Telepon'),
+                TextEntry::make('start_date')->label('Mulai')->date('d M Y'),
+                TextEntry::make('batas_kontrak')->label('Batas Kontrak')->date('d M Y'),
+            ])
+        ]);
+    }
+
 
     public static function getEloquentQuery(): Builder
     {

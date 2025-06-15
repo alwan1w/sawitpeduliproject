@@ -23,6 +23,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\BadgeColumn;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\CheckboxList;
@@ -47,8 +48,9 @@ class ApplicationResource extends Resource
 
             \Filament\Forms\Components\Placeholder::make('info_lowongan')
                 ->label('Lowongan')
-                ->content(function () {
-                    $recruitment = \App\Models\Recruitment::find(request()->get('recruitment_id'));
+                ->content(function ($get) {
+                    $rid = $get('recruitment_id');
+                    $recruitment = \App\Models\Recruitment::find($rid);
                     return $recruitment
                         ? "{$recruitment->company->name} - {$recruitment->position}"
                         : '-';
@@ -57,6 +59,7 @@ class ApplicationResource extends Resource
             Hidden::make('recruitment_id')
                 ->default(fn () => request()->get('recruitment_id'))
                 ->required(),
+
 
             TextInput::make('name')
                 ->label('Nama Lengkap')
@@ -76,7 +79,17 @@ class ApplicationResource extends Resource
 
             TextInput::make('address')
                 ->label('Alamat Domisili')
-                ->columnSpanFull()
+                ->required(),
+
+            FileUpload::make('profile_photo')
+                ->label('Foto Profil')
+                ->image()
+                ->directory('profile_photos')
+                ->maxSize(1024) // maksimal 1MB, bisa disesuaikan
+                ->preserveFilenames()
+                ->imageCropAspectRatio('1:1')
+                ->openable()
+                ->downloadable()
                 ->required(),
 
             // Tampilkan upload field sesuai lowongan yang dipilih
@@ -89,16 +102,17 @@ class ApplicationResource extends Resource
                     }
                     // bangun schema FileUpload
                     return collect($reqs)
-                        ->map(fn(string $doc) => [
-                            'component' => FileUpload::make('documents.' . Str::slug($doc, '_'))
-                                ->label($doc)
-                                ->directory('applications')
-                                ->openable()
-                                ->downloadable()
-                                ->preserveFilenames()
-                                ->required(),
-                        ])
-                        ->pluck('component')
+                        ->map(fn(string $doc) =>
+                            Forms\Components\Card::make([
+                                FileUpload::make('documents.' . Str::slug($doc, '_'))
+                                    ->label($doc)
+                                    ->directory('applications')
+                                    ->openable()
+                                    ->downloadable()
+                                    ->preserveFilenames()
+                                    ->required(),
+                            ])->columnSpan(1)
+                        )
                         ->toArray();
                 })
                 ->visible(fn(callable $get) => ! empty($get('recruitment_id')))
@@ -115,6 +129,13 @@ class ApplicationResource extends Resource
                 TextColumn::make('recruitment.position')->label('Posisi'),
                 TextColumn::make('recruitment.company.name')->label('Perusahaan'),
                 TextColumn::make('name')->label('Pelamar'),
+                ImageColumn::make('profile_photo')
+                    ->label('Foto')
+                    ->circular()
+                    ->height(40)
+                    ->width(40)
+                    ->defaultImageUrl('https://ui-avatars.com/api/?name={name}'),
+
                 TextColumn::make('phone')->label('Telepon'),
                 BadgeColumn::make('status')
                     ->label('Status')

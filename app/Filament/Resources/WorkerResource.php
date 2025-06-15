@@ -6,6 +6,7 @@ use App\Models\Worker;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use App\Models\Application;
+use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Illuminate\Support\Facades\DB;
 use Filament\Tables\Actions\Action;
@@ -16,12 +17,16 @@ use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Infolists\Components\Section;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\ImageEntry;
 use App\Filament\Resources\WorkerResource\Pages;
 
 class WorkerResource extends Resource
 {
     protected static ?string $model = Worker::class;
     protected static ?string $navigationGroup = 'Agency';
+    protected static ?int $navigationSort = 4;
     protected static ?string $navigationIcon = 'heroicon-o-user-group';
     protected static ?string $navigationLabel = 'Kelola Pekerja';
 
@@ -88,6 +93,31 @@ class WorkerResource extends Resource
         ]);
     }
 
+     // INILAH KUNCI: InfoList detail View Worker
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist->schema([
+            ImageEntry::make('application.profile_photo')
+                ->label('Foto Profil')
+                ->circular()
+                ->height(80)
+                ->width(80)
+                ->columnSpanFull()
+                ->defaultImageUrl('https://ui-avatars.com/api/?name=Fallback+Worker'),
+
+            Section::make('Data Pekerja')
+            ->columns(2) // opsional, kalau ingin dua kolom
+            ->schema([
+                TextEntry::make('company.name')->label('Perusahaan'),
+                TextEntry::make('application.name')->label('Nama Pekerja'),
+                TextEntry::make('application.recruitment.position')->label('Posisi'),
+                TextEntry::make('application.phone')->label('Telepon'),
+                TextEntry::make('start_date')->label('Mulai')->date('d M Y'),
+                TextEntry::make('batas_kontrak')->label('Batas Kontrak')->date('d M Y'),
+            ])
+        ]);
+    }
+
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
@@ -101,7 +131,8 @@ class WorkerResource extends Resource
     {
         return [
             'index' => Pages\ListWorkers::route('/'),
-            // 'view' => Pages\ViewWorker::route('/{record}'), // Tambahkan halaman view
+            // 'view' => Pages\ViewWorker::route('/{record}'),
+
         ];
     }
 

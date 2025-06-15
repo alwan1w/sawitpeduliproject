@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Gate;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Components\Placeholder;
+use Illuminate\Support\Facades\Storage;
 use Filament\Forms\Concerns\InteractsWithForms;
 
 class StatusPekerja extends Page implements HasForms
@@ -30,17 +31,24 @@ class StatusPekerja extends Page implements HasForms
     public function mount(): void
     {
         $this->worker = Worker::where('user_id', Auth::id())
-            ->with('application.recruitment.company')
-            ->firstOrFail();
+            ->with(['application.recruitment.company', 'application.user'])
+            ->first();
 
-        $this->form->fill(); // isi form kosong karena hanya Placeholder
+        $this->form->fill();
     }
 
     public function form(Form $form): Form
     {
         $w = $this->worker;
 
-        if (!$w || !$w->application || !$w->application->recruitment || !$w->application->recruitment->company) {
+        // Cek worker dan semua relasi yang wajib
+        if (
+            !$w ||
+            !$w->application ||
+            !$w->application->recruitment ||
+            !$w->application->recruitment->company ||
+            !$w->application->user
+        ) {
             return $form->schema([
                 Placeholder::make('no-data')->label('Informasi')->content('Data belum tersedia.'),
             ]);
@@ -48,7 +56,34 @@ class StatusPekerja extends Page implements HasForms
 
         $durasi = Carbon::parse($w->start_date)->diffInMonths($w->batas_kontrak);
 
+        $sertifikasiNames = \App\Models\TrainingParticipant::where('user_id', $w->application->user->id)
+            ->where('status', 'kompeten')
+            ->with('training.sertifikasi')
+            ->get()
+            ->pluck('training.sertifikasi.nama_sertifikasi')
+            ->filter()
+            ->unique()
+            ->values()
+            ->toArray();
+
         return $form->schema([
+
+            Section::make('Foto Profil')->schema([
+                Placeholder::make('')
+                    // ->label('Foto Profil')
+                    ->content(function () use ($w) {
+                        $photo = $w->application->profile_photo;
+                        $name = $w->application->name ?? 'User';
+                        $url = $photo
+                            ? \Illuminate\Support\Facades\Storage::url($photo)
+                            : "https://ui-avatars.com/api/?name=" . urlencode($name);
+
+                        return new \Illuminate\Support\HtmlString(
+                            '<img src="' . $url . '" style="width:96px;height:96px;border-radius:999px;object-fit:cover;background:#222;" alt="Foto Profil">'
+                        );
+                    }),
+            ]),
+
             Section::make('Informasi Pekerja')->schema([
                 Placeholder::make('nama')->label('Nama Lengkap')->content($w->application->name),
                 Placeholder::make('posisi')->label('Posisi')->content($w->application->recruitment->position),
@@ -63,12 +98,28 @@ class StatusPekerja extends Page implements HasForms
                 Placeholder::make('akhir_kontrak')->label('Akhir Kontrak')->content($w->batas_kontrak->format('d M Y')),
             ])->columns(2),
 
+            Section::make('Sertifikasi yang Dimiliki')->schema([
+                Placeholder::make('list_sertifikasi')
+                    ->label('')
+                    ->content(function () use ($sertifikasiNames) {
+                        if (empty($sertifikasiNames)) {
+                            return new \Illuminate\Support\HtmlString('<i>Tidak ada sertifikasi kompeten.</i>');
+                        }
+                        $html = '<ul style="padding-left:1em;margin:0;">' .
+                            implode('', array_map(fn($s) => "<li>{$s}</li>", $sertifikasiNames)) .
+                            '</ul>';
+                        return new \Illuminate\Support\HtmlString($html);
+                    }),
+
+            ]),
+
             Section::make('Informasi Perusahaan')->schema([
                 Placeholder::make('alamat_perusahaan')->label('Alamat')->content($w->application->recruitment->company->address),
                 Placeholder::make('kontak_perusahaan')->label('Kontak')->content($w->application->recruitment->company->kontak),
             ]),
         ]);
     }
+
 
     public static function canAccess(): bool
     {

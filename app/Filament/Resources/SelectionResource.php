@@ -20,6 +20,7 @@ use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Support\Facades\Storage;
 use Filament\Forms\Components\TextInput;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Placeholder;
@@ -29,6 +30,7 @@ class SelectionResource extends Resource
 {
     protected static ?string $model = Application::class;
     protected static ?string $navigationGroup = 'Agency';
+    protected static ?int $navigationSort = 3;
     protected static ?string $navigationLabel = 'Peserta Seleksi';
     protected static ?string $navigationIcon = 'heroicon-o-user-group';
 
@@ -44,6 +46,15 @@ class SelectionResource extends Resource
                     ($record->recruitment->position ?? '-')
                 ),
 
+            FileUpload::make('profile_photo')
+                ->label('Foto Profil')
+                ->image()
+                ->directory('profile_photos')
+                ->maxSize(1024)
+                ->preserveFilenames()
+                ->openable()
+                ->downloadable()
+                ->disabled(),
             // Data Pelamar
             Forms\Components\TextInput::make('name')
                 ->label('Nama Lengkap')
@@ -96,6 +107,12 @@ class SelectionResource extends Resource
     public static function table(Table $table): Table
     {
         return $table->columns([
+            ImageColumn::make('profile_photo')
+                    ->label('Foto')
+                    ->circular()
+                    ->height(40)
+                    ->width(40)
+                    ->getStateUsing(fn ($record) => $record->profile_photo ?: 'https://ui-avatars.com/api/?name=' . urlencode($record->name)),
             TextColumn::make('name')->label('Nama')->sortable()->searchable(),
             TextColumn::make('recruitment.position')->label('Posisi'),
             TextColumn::make('phone')->label('Telepon'),

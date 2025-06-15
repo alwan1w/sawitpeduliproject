@@ -20,6 +20,7 @@ class Application extends Model
         'documents',
         // field upload dinamis: slug dokumen akan otomatis jadi kolom di migration
         'status',
+        'profile_photo',
     ];
 
     protected $casts = [

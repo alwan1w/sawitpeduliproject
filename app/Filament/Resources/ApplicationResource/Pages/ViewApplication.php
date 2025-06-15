@@ -8,6 +8,7 @@ use Filament\Forms\Components\Card;
 use Illuminate\Support\Facades\Storage;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Forms\Components\Placeholder;
+use Filament\Infolists\Components\ImageEntry;
 use App\Filament\Resources\ApplicationResource;
 
 class ViewApplication extends ViewRecord
@@ -30,16 +31,22 @@ class ViewApplication extends ViewRecord
     {
         return [
             Card::make()->schema([
-                // Lowongan yang dilamar: Perusahaan – Posisi
+
                 Placeholder::make('lowongan')
                     ->label('Lowongan')
-                    ->content(fn ($record) =>
-                        ($record->recruitment->company->name ?? '-')
-                        . ' - '
-                        . ($record->recruitment->position ?? '-')
-                    ),
+                    ->content(function ($record) {
+                        if (! $record->recruitment) {
+                            return '-';
+                        }
+                        return $record->recruitment->company->name . ' - ' . $record->recruitment->position;
+                    }),
 
                 // Data Pelamar
+                ImageEntry::make('profile_photo')
+                    ->label('Foto Profil')
+                    ->height(80)
+                    ->width(80)
+                    ->circular(),
                 Placeholder::make('name')
                     ->label('Nama Lengkap')
                     ->content(fn ($record) => $record->name),
