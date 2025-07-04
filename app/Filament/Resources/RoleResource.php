@@ -49,10 +49,10 @@ class RoleResource extends Resource
             ->actions([]);
     }
 
-    // public static function canAccess(): bool
-    // {
-    //     return Gate::allows('akses_roles');
-    // }
+    public static function canAccess(): bool
+    {
+        return Gate::allows('roles');
+    }
 
     public static function getPages(): array
     {

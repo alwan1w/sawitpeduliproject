@@ -6,6 +6,9 @@ use App\Models\User;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use App\Models\Recruitment;
+use Filament\Infolists\Infolist;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\Section;
 use Filament\Resources\Resource;
 use Filament\Tables\Actions\Action;
 use Illuminate\Support\Facades\Auth;
@@ -130,6 +133,74 @@ class RecruitmentResource extends Resource
                     ]);
                 }),
             ]);
+    }
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist->schema([
+            Section::make('Info Rekrutmen')
+                ->schema([
+                    TextEntry::make('company.name')->label('Perusahaan'),
+                    TextEntry::make('position')->label('Posisi'),
+                    TextEntry::make('detail_posisi')->label('Detail Posisi'),
+                    TextEntry::make('requirement_total')->label('Jumlah Kebutuhan'),
+                    TextEntry::make('open_date')
+                        ->label('Tanggal Mulai')
+                        ->formatStateUsing(fn ($state) => $state ? \Carbon\Carbon::parse($state)->format('d M Y') : '-'),
+                    TextEntry::make('close_date')
+                        ->label('Tanggal Tutup')
+                        ->formatStateUsing(fn ($state) => $state ? \Carbon\Carbon::parse($state)->format('d M Y') : '-'),
+                    TextEntry::make('salary_range')->label('Rentang Gaji'),
+                    TextEntry::make('contract_duration')->label('Durasi Kontrak (bulan)'),
+                    TextEntry::make('skills')->label('Keahlian Diperlukan'),
+                    TextEntry::make('age_range')->label('Rentang Usia'),
+                    TextEntry::make('education')->label('Pendidikan Minimal'),
+                ])
+                ->columns(2),
+
+            Section::make('Agen dan Status')
+                ->schema([
+                    TextEntry::make('agency.name')->label('Agen Tujuan')->default('-'),
+                    TextEntry::make('status')
+                        ->label('Status Rekrutmen')
+                        ->formatStateUsing(fn($state) => match($state) {
+                            'mencari_agen'    => 'Mencari Agen',
+                            'mencari_pekerja' => 'Mencari Pekerja',
+                            'selesai'         => 'Selesai',
+                            default           => $state,
+                        }),
+                    TextEntry::make('agency_status')
+                        ->label('Status Agen')
+                        ->formatStateUsing(fn($state, $record) => match($state) {
+                            'menunggu' => "Menunggu ({$record->agency?->name})",
+                            'diterima' => "Diterima ({$record->agency?->name})",
+                            'ditolak'  => "Ditolak ({$record->agency?->name})",
+                            default    => $state,
+                        }),
+                ])
+                ->columns(2),
+
+            Section::make('Sertifikasi Wajib')
+                ->schema([
+                    TextEntry::make('required_certifications')
+                        ->label('Sertifikasi Wajib')
+                        ->html()
+                        ->state(function ($record) {
+                            $ids = is_array($record->required_certifications)
+                                ? $record->required_certifications
+                                : (is_string($record->required_certifications)
+                                    ? array_map('intval', explode(',', $record->required_certifications))
+                                    : []);
+                            if (empty($ids)) return '<i>- Tidak ada sertifikasi wajib -</i>';
+                            $names = \App\Models\Sertifikasi::whereIn('id', $ids)
+                                ->pluck('nama_sertifikasi')
+                                ->toArray();
+                            return '<ul style="padding-left:1em;">'
+                                . collect($names)->map(fn($n) => "<li>{$n}</li>")->implode('')
+                                . '</ul>';
+                        }),
+                ]),
+        ]);
     }
 
     public static function getPages(): array

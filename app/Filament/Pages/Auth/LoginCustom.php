@@ -4,6 +4,7 @@ namespace App\Filament\Pages\Auth;
 
 use Filament\Pages\Page;
 use Filament\Pages\Auth\Login;
+use Illuminate\Support\Facades\Log;
 use Filament\Forms\Components\Component;
 use Filament\Forms\Components\TextInput;
 use Illuminate\Validation\ValidationException;
@@ -37,7 +38,16 @@ class LoginCustom extends Login
 
     protected function getCredentialsFromFormData(array $data): array
     {
+        $login = $data['login'];
         $login_type = filter_var($data['login'], FILTER_VALIDATE_EMAIL) ? 'email' : 'name';
+        if ($login_type === 'name') {
+        // Cari username tanpa case sensitive
+        $user = \App\Models\User::whereRaw('lower(name) = ?', [strtolower($login)])->first();
+        if ($user) {
+            $login = $user->name; // Pakai username asli yang case-nya benar
+        }
+    }
+        Log::info('Login attempt', ['type' => $login_type, 'value' => $data['login']]);
         return [
             $login_type => $data['login'],
             'password' => $data['password'],

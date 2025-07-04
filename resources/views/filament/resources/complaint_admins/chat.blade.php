@@ -41,11 +41,26 @@
                     </div>
                     <div style="max-width:65%; min-width:80px; background:{{ $bubbleBg }}; color:#fff; padding:12px 16px; border-radius:16px; font-size:1rem; {{ $margin }}">
                         @if($msg->image)
-                            <a href="{{ Storage::url($msg->image) }}" target="_blank">
-                                <img src="{{ Storage::url($msg->image) }}" alt="image" style="max-width:150px; border-radius:8px; margin-bottom:6px;" />
-                            </a>
+                            @php
+                                $fileUrl = Storage::url($msg->image);
+                                $extension = strtolower(pathinfo($msg->image, PATHINFO_EXTENSION));
+                                $isImage = in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'jfif']);
+                                $displayName = preg_replace('/^\d+_/', '', basename($msg->image));
+
+                            @endphp
+                            @if($isImage)
+                                <a href="{{ $fileUrl }}" target="_blank">
+                                    <img src="{{ $fileUrl }}" alt="image" style="max-width:150px; border-radius:8px; margin-bottom:6px;" />
+                                </a>
+                            @else
+                                <a href="{{ $fileUrl }}" target="_blank" style="color:white;text-decoration:underline;">
+                                    📄 {{ $displayName }}
+                                </a>
+                            @endif
                         @endif
-                        {{ $msg->message }}
+                        @if($msg->message)
+                            <div>{{ $msg->message }}</div>
+                        @endif
                         <div style="font-size:11px; color:#ffffff; text-align:right; margin-top:6px;">
                             {{ $msg->created_at->timezone('Asia/Jakarta')->format('H:i') }}
                         </div>
@@ -56,15 +71,15 @@
     </div>
 
     <form wire:submit.prevent="sendMessage" style="display: flex; align-items: center; gap:8px;">
-            <textarea wire:model.defer="new_message"
-                placeholder="Tulis pesan..."
-                rows="2"
-                style="width:65%; color: #111; background: #fff; border-radius:5px; padding:8px;"
-            ></textarea>
-            <input type="file" wire:model="new_image" accept="image/*" style="width:20%;" />
-            <button type="submit"
-                style="width:15%; background:#2563eb; color:white; border:none; border-radius:5px;">
-                Kirim
-            </button>
+        <textarea wire:model.defer="new_message"
+            placeholder="Tulis pesan..."
+            rows="2"
+            style="width:55%; color: #111; background: #fff; border-radius:5px; padding:8px;"
+        ></textarea>
+        <input type="file" wire:model="new_file" style="width:30%;" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" />
+        <button type="submit"
+            style="width:15%; background:#2563eb; color:white; border:none; border-radius:5px;">
+            Kirim
+        </button>
     </form>
 </div>

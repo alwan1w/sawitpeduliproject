@@ -30,6 +30,7 @@ class AvailableTrainingResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('tema_pelatihan')->label('Tema'),
+                TextColumn::make('sertifikasi.nama_sertifikasi')->label('Sertifikasi'),
                 TextColumn::make('tanggal_pelatihan')->label('Tanggal')->date(),
                 TextColumn::make('kuota_peserta')->label('Kuota'),
             ])

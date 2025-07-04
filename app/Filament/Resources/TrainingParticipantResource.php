@@ -44,7 +44,8 @@ class TrainingParticipantResource extends Resource
             ->columns([
                 TextColumn::make('nama')->label('Nama'),
                 TextColumn::make('training.tema_pelatihan')->label('Pelatihan'),
-                TextColumn::make('alamat')->label('Alamat'),
+                TextColumn::make('training.sertifikasi.nama_sertifikasi')->label('Sertifikasi'),
+                // TextColumn::make('alamat')->label('Alamat'),
                 TextColumn::make('tempat_lahir')->label('Tempat Lahir'),
                 TextColumn::make('tanggal_lahir')->label('Tanggal Lahir')->date(),
                 TextColumn::make('gender')->label('Jenis Kelamin')

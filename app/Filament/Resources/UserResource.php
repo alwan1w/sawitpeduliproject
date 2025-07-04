@@ -39,10 +39,10 @@ class UserResource extends Resource
             ]);
     }
 
-    // public static function canAccess(): bool
-    // {
-    //     return Gate::allows('akses_users');
-    // }
+    public static function canAccess(): bool
+    {
+        return Gate::allows('users');
+    }
 
     public static function table(Table $table): Table
     {

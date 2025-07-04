@@ -144,19 +144,7 @@ class LowonganResource extends Resource
                 ])
                 ->columns(1),
 
-             Section::make('Proses dan Jadwal')
-                ->schema([
-                    TextEntry::make('selection_process')->label('Proses Seleksi'),
-                    TextEntry::make('open_date')
-                        ->label('Tanggal Dibuka')
-                        ->formatStateUsing(fn ($state) => $state ? \Carbon\Carbon::parse($state)->format('d M Y') : '—'),
-                    TextEntry::make('close_date')
-                        ->label('Tanggal Ditutup')
-                        ->formatStateUsing(fn ($state) => $state ? \Carbon\Carbon::parse($state)->format('d M Y') : '—'),
-                ])
-                ->columns(2),
-
-            // --- Bagian yang diubah: dari Placeholder menjadi TextEntry ---
+                // --- Bagian yang diubah: dari Placeholder menjadi TextEntry ---
             Section::make('Status Sertifikasi Anda')
                 ->description('Lihat status kepemilikan sertifikasi wajib lowongan ini.')
                 ->schema([
@@ -207,9 +195,21 @@ class LowonganResource extends Resource
                             $html .= '</ul>';
                             return $html;
                         }),
-                ])
+                    ]),
 
             // --- Akhir Bagian yang diubah ---
+
+             Section::make('Proses dan Jadwal')
+                ->schema([
+                    TextEntry::make('selection_process')->label('Proses Seleksi'),
+                    TextEntry::make('open_date')
+                        ->label('Tanggal Dibuka')
+                        ->formatStateUsing(fn ($state) => $state ? \Carbon\Carbon::parse($state)->format('d M Y') : '—'),
+                    TextEntry::make('close_date')
+                        ->label('Tanggal Ditutup')
+                        ->formatStateUsing(fn ($state) => $state ? \Carbon\Carbon::parse($state)->format('d M Y') : '—'),
+                ])
+                ->columns(2),
         ]);
     }
 

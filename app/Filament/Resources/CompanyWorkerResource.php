@@ -121,7 +121,36 @@ class CompanyWorkerResource extends Resource
                 TextEntry::make('application.phone')->label('Telepon'),
                 TextEntry::make('start_date')->label('Mulai')->date('d M Y'),
                 TextEntry::make('batas_kontrak')->label('Batas Kontrak')->date('d M Y'),
-            ])
+            ]),
+            Section::make('Sertifikasi yang Dimiliki')
+            ->schema([
+                TextEntry::make('sertifikasi_user')
+                    ->label('')
+                    ->html()
+                    ->state(function ($record) {
+                        // Ambil user_id dari application
+                        $userId = $record->application?->user_id;
+                        if (!$userId) return '<i>Data tidak tersedia</i>';
+
+                        // Ambil nama sertifikasi "kompeten"
+                        $sertifikasi = \App\Models\TrainingParticipant::where('user_id', $userId)
+                            ->where('status', 'kompeten')
+                            ->with('training.sertifikasi')
+                            ->get()
+                            ->pluck('training.sertifikasi.nama_sertifikasi')
+                            ->filter()
+                            ->unique()
+                            ->values();
+
+                        if ($sertifikasi->isEmpty()) {
+                            return '<i>Tidak ada sertifikasi kompeten.</i>';
+                        }
+
+                        return '<ul style="padding-left:1em;margin:0;">' .
+                            $sertifikasi->map(fn($s) => "<li>{$s}</li>")->implode('') .
+                            '</ul>';
+                    }),
+            ]),
         ]);
     }
 

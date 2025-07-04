@@ -147,7 +147,8 @@ class LamaranMasukResource extends Resource
     {
         // Hanya lamaran untuk recruitment yang di-handle agent ini
         return parent::getEloquentQuery()
-            ->whereHas('recruitment', fn ($q) => $q->where('agency_id', Auth::id()));
+            ->whereHas('recruitment', fn ($q) => $q->where('agency_id', Auth::id()))
+            ->where('status', 'masuk');
     }
 
     public static function canAccess(): bool

@@ -38,10 +38,10 @@ class PermissionResource extends Resource
         ]);
     }
 
-    // public static function canAccess(): bool
-    // {
-    //     return Gate::allows('akses_permissions');
-    // }
+    public static function canAccess(): bool
+    {
+        return Gate::allows('akses permission');
+    }
 
     public static function getPages(): array
     {

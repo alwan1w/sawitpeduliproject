@@ -39,6 +39,7 @@ class TrainingParticipantPemkabResource extends Resource
             ->columns([
                 TextColumn::make('nama')->searchable(),
                 TextColumn::make('training.tema_pelatihan')->label('Pelatihan')->searchable(),
+                TextColumn::make('training.sertifikasi.nama_sertifikasi')->label('Sertifikasi'),
                 TextColumn::make('status')
                     ->searchable()   // Kolom status
                     ->label('Status')

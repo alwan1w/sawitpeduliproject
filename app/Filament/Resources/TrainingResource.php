@@ -47,6 +47,7 @@ class TrainingResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('tema_pelatihan')->label('Tema')->searchable(),
+                Tables\Columns\TextColumn::make('sertifikasi.nama_sertifikasi')->label('Sertifikasi'),
                 Tables\Columns\TextColumn::make('materi.judul_materi')->label('Materi'),
                 Tables\Columns\TextColumn::make('moderator')->label('Moderator'),
                 Tables\Columns\TextColumn::make('tanggal_pelatihan')->label('Tanggal')->date('d M Y'),

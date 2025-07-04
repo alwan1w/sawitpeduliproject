@@ -115,7 +115,7 @@ class StatusPekerja extends Page implements HasForms
 
             Section::make('Informasi Perusahaan')->schema([
                 Placeholder::make('alamat_perusahaan')->label('Alamat')->content($w->application->recruitment->company->address),
-                Placeholder::make('kontak_perusahaan')->label('Kontak')->content($w->application->recruitment->company->kontak),
+                Placeholder::make('kontak_perusahaan')->label('Kontak')->content($w->application->recruitment->company->phone),
             ]),
         ]);
     }
